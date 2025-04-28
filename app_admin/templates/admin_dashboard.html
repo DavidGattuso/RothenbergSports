@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Panel de Administración</h2>
+    
+    <div class="row">
+        <!-- Sección de usuarios -->
+        <div class="col-12 mb-4">
+            <h3>Usuarios</h3>
+            <a href="{% url 'crear_usuario' %}" class="btn btn-success mb-3">Crear Usuario</a>
+            <ul class="list-group">
+                {% for user in users %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ user.username }} - {{ user.email }}
+                    <div>
+                        <a href="{% url 'editar_usuario' user.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ user.id }}">
+                            Eliminar
+                        </button>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Modal de confirmación de eliminación de cuenta -->
+        {% for user in users %}
+        <div class="modal fade" id="confirmDeleteModal{{ user.id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ user.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel{{ user.id }}">Confirmar Eliminación de Usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form action="{% url 'eliminar_usuario' user.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Eliminar Usuario</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Sección de productos -->
+        <div class="col-12 mb-4">
+            <h3>Agregar Producto</h3>
+            <!-- Formulario para crear un nuevo producto -->
+            <form id="add-product-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <input type="text" class="form-control" id="descripcion" name="descripcion" required>
+                </div>
+                <div class="mb-3">
+                    <label for="precio" class="form-label">Precio</label>
+                    <input type="number" class="form-control" id="precio" name="precio" required>
+                </div>
+                <div class="mb-3">
+                    <label for="categoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="categoria" name="categoria" required>
+                        <option value="1">Hombre</option>
+                        <option value="2">Mujer</option>
+                        <option value="3">Niño</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="imagen" class="form-label">Imagen</label>
+                    <input type="file" class="form-control" id="imagen" name="imagen" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tallas" class="form-label">Tallas</label>
+                    <select class="form-select" id="tallas" name="tallas" multiple required>
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                    </select>
+                    <button type="button" class="btn btn-primary mt-2" id="add-tallas-btn">Agregar Tallas</button>
+                </div>
+
+                <div id="selected-tallas-container" class="mt-3">
+                    <h5>Tallas seleccionadas:</h5>
+                    <ul id="selected-tallas-list" class="list-group">
+                        <!-- Tallas seleccionadas se agregarán aquí -->
+                    </ul>
+                </div>
+
+                <!-- Botones para los formularios -->
+                <div class="d-flex justify-content-between mt-3">
+                    <button type="submit" class="btn btn-success">Agregar Producto</button>
+                    <button type="reset" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sección de botones principales para la API -->
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between flex-column align-items-center mt-4">
+                <!-- Botones destacados -->
+                <button id="load-products-btn" class="btn btn-primary mb-3 w-100">Cargar Productos desde la API</button>
+                <a href="http://127.0.0.1:8000/api/productos/" class="btn btn-info mb-3 w-100" target="_blank">Ver Productos API</a>
+            </div>
+        </div>
+
+        <div id="productos-container" class="row">
+            <!-- Aquí se cargarán los productos con AJAX -->
+        </div>
+    </div>
+</div>
+
+<!-- Agregar el token de la API como un meta tag -->
+<meta name="api-token" content="{{ api_token }}">
+
+<script>
+    // Obtener el token del meta tag
+    const apiToken = document.querySelector('meta[name="api-token"]').getAttribute('content');
+
+    // Evento para agregar tallas seleccionadas
+    document.getElementById('add-tallas-btn').addEventListener('click', function() {
+        const tallasSeleccionadas = Array.from(document.getElementById('tallas').selectedOptions).map(option => option.value);
+
+        if (tallasSeleccionadas.length > 0) {
+            // Agregar las tallas seleccionadas al contenedor
+            const tallasList = document.getElementById('selected-tallas-list');
+
+            // Solo agregar tallas si no están ya en la lista
+            tallasSeleccionadas.forEach(talla => {
+                if (![...tallasList.children].some(item => item.textContent === talla)) {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+                    li.textContent = talla;
+
+                    // Crear el botón de eliminar para cada talla
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.classList.add('btn', 'btn-sm', 'btn-danger', 'ms-2');
+                    deleteBtn.textContent = 'Eliminar';
+                    deleteBtn.addEventListener('click', function() {
+                        li.remove();
+                        updateTallasHiddenInput();
+                    });
+
+                    // Agregar el botón al item
+                    li.appendChild(deleteBtn);
+                    tallasList.appendChild(li);
+                }
+            });
+
+            // Actualizar el input oculto para enviar las tallas seleccionadas
+            updateTallasHiddenInput();
+        } else {
+            alert('Por favor, selecciona al menos una talla');
+        }
+    });
+
+    // Función para actualizar el input oculto con las tallas seleccionadas
+    function updateTallasHiddenInput() {
+        const tallasListItems = Array.from(document.getElementById('selected-tallas-list').children);
+        const tallas = tallasListItems.map(item => item.textContent.replace('Eliminar', '').trim());
+
+        let existingTallas = document.getElementById('tallas').getAttribute('data-tallas') || '[]';
+        existingTallas = JSON.parse(existingTallas);
+
+        // Actualizar el campo de datos con las tallas
+        document.getElementById('tallas').setAttribute('data-tallas', JSON.stringify(tallas));
+
+        // Crear o actualizar el campo oculto para enviar las tallas seleccionadas
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'tallas'; // Lo enviamos como array
+        hiddenInput.value = JSON.stringify(tallas); // Convertirlo a JSON
+
+        // Eliminar el input oculto anterior si existe
+        const existingInput = document.querySelector('input[name="tallas"]');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // Agregar el input al formulario
+        document.getElementById('add-product-form').appendChild(hiddenInput);
+    }
+
+    // Evento para enviar el formulario de agregar producto
+    document.getElementById('add-product-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this); // Crear FormData para manejar archivos
+
+        // Enviar el producto a la API
+        fetch('/api/productos/', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + apiToken,  // Usar el token
+            },
+            body: formData // Enviar el formulario con la imagen
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Producto agregado:', data);
+            alert('Producto agregado correctamente');
+            // Limpiar formulario después de agregar
+            document.getElementById('add-product-form').reset();
+            document.getElementById('selected-tallas-list').innerHTML = ''; // Limpiar tallas seleccionadas
+        })
+        .catch(error => {
+            console.error('Error al agregar el producto:', error);
+        });
+    });
+
+    // Evento de clic en el botón para cargar productos desde la API
+    document.getElementById('load-products-btn').addEventListener('click', function() {
+        // Consumir la API para obtener la lista de productos
+        fetch('/api/productos/', {
+            headers: {
+                'Authorization': 'Bearer ' + apiToken  // Usar el token aquí
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la carga de productos');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const productosContainer = document.getElementById('productos-container');
+                productosContainer.innerHTML = ''; // Limpiar la lista actual
+
+                // Iterar sobre los productos y agregarlos al contenedor
+                data.forEach(producto => {
+                    // Crear un div para cada producto con sus datos
+                    const productoDiv = document.createElement('div');
+                    productoDiv.classList.add('col-md-4', 'mb-4');
+
+                    // Formatear el precio
+                    let precio = producto.precio.toString();
+                    if (precio.endsWith('.00')) {
+                        precio = precio.split('.')[0]; // Eliminar los decimales si es '.00'
+                    }
+                    precio = precio.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Agregar puntos como separadores de miles
+
+                    // Crear el contenido de la tarjeta del producto
+                    productoDiv.innerHTML = `
+                        <div class="card shadow-sm" style="width: 18rem;">
+                            <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
+                            <div class="card-body">
+                                <h5 class="card-title">${producto.nombre}</h5>
+                                <p class="card-text">${producto.descripcion}</p>
+                                <p class="card-text fw-bold fs-5">$${precio}</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Agregar el producto a la lista de productos
+                    productosContainer.appendChild(productoDiv);
+                });
+            })
+            .catch(error => {
+                console.error('Error al cargar los productos:', error);
+                alert('Hubo un problema al cargar los productos. Inténtalo nuevamente.');
+            });
+    });
+</script>
+
+{% endblock %}

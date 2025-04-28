@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 fw-bold">Editar Usuario</h2>
+    
+    <!-- Formulario para editar datos del usuario -->
+    <form method="post" class="p-4 bg-light rounded shadow">
+        {% csrf_token %}
+        
+        <!-- Campo para el correo electrónico (solo lectura) -->
+        <div class="mb-4">
+            <label for="email" class="form-label fw-semibold">Correo Electrónico</label>
+            <input type="email" class="form-control form-control-lg rounded-pill shadow-sm" 
+                   id="email" name="email" value="{{ user.email }}" readonly style="background-color: #f2f2f2; color: #6c757d;">
+        </div>
+
+        <!-- Campo para el nombre -->
+        <div class="mb-4">
+            <label for="first_name" class="form-label fw-semibold">Nombre</label>
+            <input type="text" class="form-control form-control-lg rounded-pill shadow-sm" 
+                   id="first_name" name="first_name" value="{{ user.first_name }}" required>
+        </div>
+
+        <!-- Campo para el apellido -->
+        <div class="mb-4">
+            <label for="last_name" class="form-label fw-semibold">Apellido</label>
+            <input type="text" class="form-control form-control-lg rounded-pill shadow-sm" 
+                   id="last_name" name="last_name" value="{{ user.last_name }}" required>
+        </div>
+
+        <!-- Campo para el teléfono -->
+        <div class="mb-4">
+            <label for="phone" class="form-label fw-semibold">Teléfono</label>
+            <input type="text" class="form-control form-control-lg rounded-pill shadow-sm" 
+                   id="phone" name="phone" value="{{ profile.phone|default_if_none:'' }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow">Guardar Cambios</button>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-lg w-100 rounded-pill shadow mt-3">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
