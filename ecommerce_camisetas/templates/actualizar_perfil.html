@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Actualizar Perfil{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 fw-bold">Actualizar Perfil</h2>
+    
+    <!-- Formulario para actualizar datos del perfil de usuario -->
+    <form method="post" class="needs-validation p-4 bg-light rounded shadow" novalidate>
+        {% csrf_token %}
+
+        <!-- Campo para el nombre -->
+        <div class="mb-4">
+            <label for="first_name" class="form-label fw-semibold">Nombre</label>
+            <input type="text" class="form-control form-control-lg rounded-pill shadow-sm" 
+                   id="first_name" name="first_name" value="{{ first_name }}" required>
+            <div class="invalid-feedback">
+                Por favor ingresa tu nombre.
+            </div>
+        </div>
+
+        <!-- Campo para el apellido -->
+        <div class="mb-4">
+            <label for="last_name" class="form-label fw-semibold">Apellido</label>
+            <input type="text" class="form-control form-control-lg rounded-pill shadow-sm" 
+                   id="last_name" name="last_name" value="{{ last_name }}" required>
+            <div class="invalid-feedback">
+                Por favor ingresa tu apellido.
+            </div>
+        </div>
+
+        <!-- Campo para el teléfono -->
+        <div class="mb-4">
+            <label for="phone" class="form-label fw-semibold">Teléfono</label>
+            <input type="text" class="form-control form-control-lg rounded-pill shadow-sm" 
+                   id="phone" name="phone" value="{{ form.phone.value }}" required>
+            <div class="invalid-feedback">
+                Por favor ingresa tu número de teléfono.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow">Guardar Cambios</button>
+    </form>
+</div>
+
+<script>
+    // Validación de formulario
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load humanize %}  <!-- Cargar la biblioteca humanize -->
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row shadow-lg rounded p-5 bg-white align-items-center">
+        <!-- Imagen del producto -->
+        <div class="col-lg-6 d-flex justify-content-center align-items-center mb-4 mb-lg-0">
+            <img src="{{ producto.imagen.url }}" class="img-fluid rounded shadow" alt="{{ producto.nombre }}" style="max-width: 100%; height: auto;">
+        </div>
+        
+        <!-- Detalles del producto -->
+        <div class="col-lg-6">
+            <h1 class="fw-bold text-dark mb-3">{{ producto.nombre }}</h1>
+            <p class="text-muted fs-5 mb-4">{{ producto.descripcion }}</p>
+            <p class="display-6 text-primary fw-bold">Precio: ${{ producto.precio_redondeado|intcomma }}</p>
+
+            <!-- Reseña y Puntuación Estática por Producto -->
+            <div class="mb-4">
+                <div class="d-flex align-items-center">
+                    <span class="text-warning fs-5">
+                        {% if producto.id == 1 %}
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        {% elif producto.id == 2 %}
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                        {% elif producto.id == 3 %}
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star"></i>
+                            <i class="bi bi-star"></i>
+                        {% else %}
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        {% endif %}
+                    </span>
+                    <span class="text-muted ms-2"> 
+                        {% if producto.id == 1 %}(4.5 de 5 - "Excelente calidad y diseño"){% endif %}
+                        {% if producto.id == 2 %}(4 de 5 - "Muy buena camiseta, se adapta bien"){% endif %}
+                        {% if producto.id == 3 %}(4 de 5 - "Bonito diseño, pero un poco ajustado"){% endif %}
+                        {% if producto.id != 1 and producto.id != 2 and producto.id != 3 %}(5 de 5 - "Producto excelente, lo recomiendo totalmente"){% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Selector de talla y botón de agregar al carrito -->
+            <form method="POST" action="{% url 'agregar_al_carrito' producto.id %}" class="mt-4">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="talla" class="form-label fw-semibold fs-5">Seleccione una talla:</label>
+                    <select name="talla" id="talla" class="form-select shadow-sm p-3" required>
+                        {% for talla in tallas_disponibles %}
+                            <option value="{{ talla.talla }}">{{ talla.get_talla_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 shadow-lg d-flex align-items-center justify-content-center fs-5">
+                    <i class="bi bi-cart-plus me-2"></i> Agregar al Carrito
+                </button>
+            </form>
+
+            <!-- Navegación entre productos -->
+            <div class="d-flex justify-content-between mt-4">
+                {% if producto_anterior %}
+                    <a href="{% url 'detalle_producto' producto_anterior.id %}" class="btn btn-outline-secondary flex-fill me-1">
+                        <i class="bi bi-arrow-left-circle"></i> Anterior
+                    </a>
+                {% endif %}
+                {% if producto_siguiente %}
+                    <a href="{% url 'detalle_producto' producto_siguiente.id %}" class="btn btn-outline-secondary flex-fill ms-1">
+                        Siguiente <i class="bi bi-arrow-right-circle"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

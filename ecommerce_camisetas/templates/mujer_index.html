@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load humanize %}  <!-- Cargar la biblioteca humanize -->
+
+{% block title %}Camisetas Mujer - Estilo y Elegancia{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- Título con estilo y sombra sutil -->
+        <div class="text-center my-5">
+            <h2 class="fw-bold display-4" style="color: #D63384; text-shadow: 2px 2px 5px rgba(214, 51, 132, 0.3);">
+                Camisetas para Mujer
+            </h2>
+            <p class="lead text-muted" style="font-size: 1.2rem;">
+                Descubre la elegancia en cada detalle y combina estilo con comodidad en nuestra colección.
+            </p>
+        </div>
+
+        <!-- Galería de productos -->
+        <div class="row g-4 mb-5">
+            {% for producto in productos_mujer %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-lg d-flex flex-column rounded-3 border-0" style="border-color: #F8D7DA;">
+                    <img src="{{ producto.imagen.url }}" class="card-img-top img-fluid rounded-top" alt="{{ producto.nombre }}" style="width: 100%; height: 300px; object-fit: contain;">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="card-title text-dark">{{ producto.nombre }}</h4>
+                        <p class="card-text text-muted">{{ producto.descripcion }}</p>
+                        <p class="card-text fw-bold fs-5" style="color: #D63384;">Precio: ${{ producto.precio_redondeado|intcomma }}</p>
+                        <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-danger mt-auto fw-bold">Ver más</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center fs-4 text-muted">No hay productos disponibles para mujer.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

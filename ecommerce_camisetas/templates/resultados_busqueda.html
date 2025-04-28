@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load humanize %}  <!-- Cargar humanize para usar intcomma -->
+
+{% block title %}Resultados de Búsqueda{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center text-dark mb-5" style="font-weight: bold; font-size: 2.5rem;">Resultados de Búsqueda</h2>
+
+    <!-- Comprueba si hay productos en alguna categoría para mostrar -->
+    {% if productos_hombre or productos_mujer or productos_ninos %}
+        <div class="row g-4">
+            <!-- Mostrar productos en la categoría 'Hombre' -->
+            {% for producto in productos_hombre %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm bg-light text-dark p-3 rounded-3">
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="card-img-top img-fluid rounded mb-3" style="width: 100%; height: 300px; object-fit: contain;">
+                        <div class="card-body text-center d-flex flex-column">
+                            <h4 class="card-title text-dark">{{ producto.nombre }}</h4>
+                            <p class="card-text fw-bold fs-5 text-muted">Precio: ${{ producto.precio_redondeado|intcomma }}</p>
+                            <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-dark mt-auto fw-bold rounded-pill">Ver más</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Mostrar productos en la categoría 'Mujer' -->
+            {% for producto in productos_mujer %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm bg-light text-dark p-3 rounded-3">
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="card-img-top img-fluid rounded mb-3" style="width: 100%; height: 300px; object-fit: contain;">
+                        <div class="card-body text-center d-flex flex-column">
+                            <h4 class="card-title text-dark">{{ producto.nombre }}</h4>
+                            <p class="card-text fw-bold fs-5 text-muted">Precio: ${{ producto.precio_redondeado|intcomma }}</p>
+                            <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-dark mt-auto fw-bold rounded-pill">Ver más</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Mostrar productos en la categoría 'Niños' -->
+            {% for producto in productos_ninos %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm bg-light text-dark p-3 rounded-3">
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="card-img-top img-fluid rounded mb-3" style="width: 100%; height: 300px; object-fit: contain;">
+                        <div class="card-body text-center d-flex flex-column">
+                            <h4 class="card-title text-dark">{{ producto.nombre }}</h4>
+                            <p class="card-text fw-bold fs-5 text-muted">Precio: ${{ producto.precio_redondeado|intcomma }}</p>
+                            <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-dark mt-auto fw-bold rounded-pill">Ver más</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Mensaje si no se encontraron productos que coincidan con la búsqueda -->
+        <p class="text-center fs-4 text-muted mt-5">No se encontraron productos que coincidan con tu búsqueda.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load humanize %}  <!-- Cargar la biblioteca humanize -->
+{% load static %}
+
+{% block title %}Carrito de Compras{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-5 fw-bold" style="font-size: 2.5rem;">Carrito de Compras</h2>
+    
+    <!-- Mensaje si el carrito está vacío -->
+    {% if not carrito.carritoitem_set.all %}
+        <div class="alert alert-warning text-center fs-4" role="alert">
+            Tu carrito está vacío. ¡Agrega productos antes de continuar al pago!
+        </div>
+    {% else %}
+        <!-- Tabla de productos en el carrito -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle shadow-sm" style="font-size: 1.3rem;">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="text-center" style="width: 120px;">Imagen</th> <!-- Columna de imagen más grande -->
+                        <th>Producto</th>
+                        <th class="text-center">Talla</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-end">Subtotal</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Fila para cada producto en el carrito -->
+                    {% for item in carrito.carritoitem_set.all %}
+                    <tr>
+                        <!-- Columna de imagen del producto -->
+                        <td class="text-center">
+                            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" class="img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
+                        </td>
+                        <td class="fw-semibold">{{ item.producto.nombre }}</td>
+                        <td class="text-center">{{ item.talla }}</td>
+                        <td class="text-center">
+                            <div class="d-inline-flex align-items-center">
+                                <!-- Disminuir cantidad -->
+                                <form method="POST" action="{% url 'decrementar_cantidad' item.id %}" class="me-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm px-3"><i class="bi bi-dash-lg"></i></button>
+                                </form>
+                                <span class="fs-5 mx-3">{{ item.cantidad }}</span>
+                                <!-- Aumentar cantidad -->
+                                <form method="POST" action="{% url 'incrementar_cantidad' item.id %}" class="ms-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm px-3"><i class="bi bi-plus-lg"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                        <!-- Subtotal basado en cantidad -->
+                        <td class="text-end fw-bold text-primary fs-4">${{ item.subtotal|floatformat:"0"|intcomma }}</td>
+                        <td class="text-center">
+                            <!-- Eliminar producto del carrito -->
+                            <form method="POST" action="{% url 'eliminar_item_carrito' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Total del carrito -->
+        <div class="d-flex justify-content-between align-items-center my-4">
+            <h3 class="fw-bold text-dark" style="font-size: 2.2rem;">Total: <span class="text-primary">${{ carrito.total|floatformat:"0"|intcomma }}</span></h3>
+            <div>
+                <a href="{% url 'hombre_index' %}" class="btn btn-outline-secondary me-3 shadow-sm px-4 py-2">
+                    <i class="bi bi-arrow-left"></i> Seguir comprando
+                </a>
+                
+                {% if carrito.carritoitem_set.all %}
+                    <!-- Botón activo para pagar si hay productos -->
+                    <a href="{% url 'pago' %}" class="btn btn-primary px-4 py-3 shadow-sm fs-5">Ir a pagar <i class="bi bi-credit-card"></i></a>
+                {% else %}
+                    <!-- Botón deshabilitado si el carrito está vacío -->
+                    <button class="btn btn-primary px-4 py-3 fs-5" disabled>Ir a pagar</button>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
