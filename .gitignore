@@ -5,9 +5,24 @@ __pycache__/
 *.pyd
 *.pyc
 
-
-
 # MacOS basura
 .DS_Store
 __MACOSX/
 
+# Django runtime
+db.sqlite3
+/staticfiles/
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+ENV/
+
+# Archivos de editores
+.vscode/
+.idea/
+*.swp
+
+# ⚡ OJO: NO ignoramos /media/
+# Porque necesitamos que las imágenes estén visibles en la demo local
