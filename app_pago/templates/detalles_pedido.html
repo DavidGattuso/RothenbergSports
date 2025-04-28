@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load humanize %}  <!-- Cargar humanize para usar intcomma -->
+
+{% block messages %}
+    <!-- Bloque de mensajes vacío para evitar mensajes globales no deseados -->
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-5 fw-bold" style="font-size: 2.5rem;">Detalles del Pedido</h2>
+
+    <!-- Estado del Pedido (Línea de tiempo) -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-secondary text-white text-center">
+            <h5 class="mb-0">Estado del Pedido</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between text-center">
+                <!-- Paso 1: Preparando Pedido -->
+                <div class="d-flex flex-column align-items-center">
+                    {% if pedido.estado == 'Preparando pedido' %}
+                        <i class="bi bi-box-seam text-warning display-6"></i>
+                        <span class="fw-bold mt-2 text-warning">Preparando Pedido<small class="d-block text-warning">Actual</small></span>
+                    {% else %}
+                        <i class="bi bi-box-seam text-muted display-6"></i>
+                        <span class="fw-bold mt-2 text-muted">Preparando Pedido</span>
+                    {% endif %}
+                </div>
+
+                <!-- Paso 2: Entregado a Transportista -->
+                <div class="d-flex flex-column align-items-center">
+                    {% if pedido.estado == 'Entregado a transportista' %}
+                        <i class="bi bi-truck text-info display-6"></i>
+                        <span class="fw-bold mt-2 text-info">Entregado a Transportista<small class="d-block text-info">Actual</small></span>
+                    {% else %}
+                        <i class="bi bi-truck text-muted display-6"></i>
+                        <span class="fw-bold mt-2 text-muted">Entregado a Transportista</span>
+                    {% endif %}
+                </div>
+
+                <!-- Paso 3: En Camino a tu Dirección -->
+                <div class="d-flex flex-column align-items-center">
+                    {% if pedido.estado == 'En camino a tu dirección' %}
+                        <i class="bi bi-house-door text-primary display-6"></i>
+                        <span class="fw-bold mt-2 text-primary">En Camino a tu Dirección<small class="d-block text-primary">Actual</small></span>
+                    {% else %}
+                        <i class="bi bi-house-door text-muted display-6"></i>
+                        <span class="fw-bold mt-2 text-muted">En Camino a tu Dirección</span>
+                    {% endif %}
+                </div>
+
+                <!-- Paso 4: Producto Entregado -->
+                <div class="d-flex flex-column align-items-center">
+                    {% if pedido.estado == 'Producto entregado' %}
+                        <i class="bi bi-check-circle text-success display-6"></i>
+                        <span class="fw-bold mt-2 text-success">Producto Entregado<small class="d-block text-success">Actual</small></span>
+                    {% else %}
+                        <i class="bi bi-check-circle text-muted display-6"></i>
+                        <span class="fw-bold mt-2 text-muted">Producto Entregado</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información principal del pedido -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white text-center">
+            <h5 class="mb-0">Información del Pedido</h5>
+        </div>
+        <div class="card-body fs-5">
+            <p><strong>Fecha del Pedido:</strong> {{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</p>
+            <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+            <p><strong>Dirección de Envío:</strong> {{ pedido.direccion_envio.direccion }}</p>
+            <p><strong>Monto de Envío:</strong> ${{ pedido.monto_envio|floatformat:"0"|intcomma }}</p>
+            <p><strong>Total:</strong> <span class="text-primary fw-bold">${{ pedido.total|floatformat:"0"|intcomma }}</span></p>
+        </div>
+    </div>
+
+    <!-- Información del pagador -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-secondary text-white text-center">
+            <h5 class="mb-0">Información del Pagador</h5>
+        </div>
+        <div class="card-body fs-5">
+            <p><strong>Nombre:</strong> {{ pedido.direccion_envio.nombre }} {{ pedido.direccion_envio.apellidos }}</p>
+            <p><strong>Correo Electrónico:</strong> {{ pedido.direccion_envio.email }}</p>
+            <p><strong>Método de Pago:</strong> 
+                {% if pago %}
+                    {{ pago.metodo_pago|title }}
+                {% else %}
+                    Información no disponible
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Tabla de productos comprados mejorada -->
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-light text-center">
+            <h5 class="mb-0">Productos Comprados</h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table table-borderless mb-0 align-middle">
+                    <thead class="bg-primary text-white rounded">
+                        <tr>
+                            <th class="text-center" style="width: 100px;">Imagen</th>
+                            <th style="width: 40%;">Producto</th>
+                            <th class="text-center" style="width: 15%;">Talla</th>
+                            <th class="text-center" style="width: 15%;">Cantidad</th>
+                            <th class="text-end" style="width: 20%;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="fs-5">
+                        {% for item in items %}
+                        <tr class="border-bottom">
+                            <td class="text-center">
+                                <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" class="img-thumbnail rounded shadow-sm" style="width: 90px; height: 90px; object-fit: contain;">
+                            </td>
+                            <td class="fw-bold fs-5 text-dark">{{ item.producto.nombre }}</td>
+                            <td class="text-center text-secondary">{{ item.talla }}</td>
+                            <td class="text-center">{{ item.cantidad }}</td>
+                            <td class="text-end fw-bold text-primary fs-4">${{ item.subtotal|floatformat:"0"|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón para descargar la boleta en PDF -->
+    <div class="text-center mt-4">
+        <a href="{% url 'descargar_boleta' pedido.id %}" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-file-earmark-pdf"></i> Descargar Boleta en PDF
+        </a>
+    </div>
+</div>
+{% endblock %}

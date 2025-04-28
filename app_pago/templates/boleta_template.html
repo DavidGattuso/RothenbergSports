@@ -1,0 +1,71 @@
+{% load static %}
+{% load humanize %}  <!-- Asegúrate de incluir esta línea -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boleta de Pedido</title>
+    <style>
+        /* Estilos personalizados */
+        body { font-family: Arial, sans-serif; font-size: 14px; }
+        .header { text-align: center; }
+        .section { margin-top: 20px; }
+        .details { border: 1px solid #ddd; padding: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .product-image { width: 70px; height: 70px; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>Boleta de Pedido</h2>
+</div>
+
+<div class="section details">
+    <strong>Fecha del Pedido:</strong> {{ pedido.fecha_pedido|date:"d/m/Y H:i" }}<br>
+    <strong>Estado:</strong> {{ pedido.estado }}<br>
+    <strong>Dirección de Envío:</strong> {{ pedido.direccion_envio.direccion }}<br>
+    <strong>Monto de Envío:</strong> ${{ pedido.monto_envio|floatformat:"0"|intcomma }}<br>
+    <strong>Total:</strong> ${{ pedido.total|floatformat:"0"|intcomma }}
+</div>
+
+<div class="section details">
+    <h3>Información del Pagador</h3>
+    <strong>Nombre:</strong> {{ pedido.direccion_envio.nombre }} {{ pedido.direccion_envio.apellidos }}<br>
+    <strong>Correo Electrónico:</strong> {{ pedido.direccion_envio.email }}<br>
+    <strong>Método de Pago:</strong> {{ pago.metodo_pago|title }}
+</div>
+
+<div class="section">
+    <h3>Productos Comprados</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Producto</th>
+                <th>Talla</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    <!-- Cargar la imagen del producto en el PDF -->
+                    <img src="{{ item.producto.imagen_url }}" alt="{{ item.producto.nombre }}" style="width: 90px; height: 90px; object-fit: cover;">
+                </td>
+                <td>{{ item.producto.nombre }}</td>
+                <td>{{ item.talla }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>${{ item.subtotal|floatformat:"0"|intcomma }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

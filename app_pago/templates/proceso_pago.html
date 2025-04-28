@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Proceso de Pago</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-3" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="pago-form" onsubmit="return validarPaso3()">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <!-- Paso 1: Dirección de Envío -->
+        <div id="paso1" style="display: block; margin-bottom: 5rem;">
+            <h3 class="fw-bold mb-4 text-center">Paso 1: Dirección de Envío</h3>
+            <div class="card p-4 mx-auto" style="max-width: 600px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1); background-color: #f8f9fa;">
+                <div class="text-center mb-4">
+                    <i class="bi bi-geo-alt display-3 text-primary"></i>
+                    <h5 class="mt-3 mb-1">Dirección de Envío</h5>
+                    <p class="text-muted">Por favor, ingresa tus datos de envío para continuar</p>
+                </div>
+                <hr>
+
+                <div class="mb-3">
+                    <label for="id_direccion" class="form-label">{{ form.direccion.label }}</label>
+                    <input type="text" class="form-control" id="id_direccion" name="direccion" 
+                        value="{{ form.direccion.value|default:'' }}" placeholder="psje ejemplo 123" required>
+                    <div class="text-danger" id="direccion-error"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_nombre" class="form-label">{{ form.nombre.label }}</label>
+                    <input type="text" class="form-control" id="id_nombre" name="nombre" 
+                        value="{{ form.nombre.value|default:'' }}" placeholder="Ingrese su nombre" required>
+                    <div class="text-danger" id="nombre-error"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_apellidos" class="form-label">{{ form.apellidos.label }}</label>
+                    <input type="text" class="form-control" id="id_apellidos" name="apellidos" 
+                        value="{{ form.apellidos.value|default:'' }}" placeholder="Ingrese sus apellidos" required>
+                    <div class="text-danger" id="apellidos-error"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">{{ form.email.label }}</label>
+                    <input type="email" class="form-control" id="id_email" name="email" 
+                        value="{{ form.email.value|default:'' }}" placeholder="correo@example.com" required>
+                    <div class="text-danger" id="email-error"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_telefono" class="form-label">{{ form.telefono.label }}</label>
+                    <input type="text" class="form-control" id="id_telefono" name="telefono" 
+                        value="{{ form.telefono.value|default:'' }}" placeholder="9 12345678" required>
+                    <div class="text-danger" id="telefono-error"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_rut" class="form-label">{{ form.rut.label }}</label>
+                    <input type="text" class="form-control" id="id_rut" name="rut" 
+                        value="{{ form.rut.value|default:'' }}" placeholder="12345678-9" required>
+                    <div class="text-danger" id="rut-error"></div>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input type="checkbox" class="form-check-input" id="id_terminos" name="terminos" required>
+                    <label class="form-check-label" for="id_terminos">{{ form.terminos.label }}</label>
+                    <div class="text-danger" id="terminos-error"></div>
+                </div>
+
+                <button type="button" class="btn btn-primary w-100 py-2" onclick="validarPaso(1)">Siguiente <i class="bi bi-arrow-right ms-1"></i></button>
+            </div>
+        </div>
+
+
+        <!-- Paso 2: Opciones de Entrega -->
+        <div id="paso2" style="display:none;">
+            <h3 class="fw-bold mb-4 text-center">Paso 2: Opciones de Entrega</h3>
+            <div class="card shadow-sm border-0 p-4">
+                <div class="text-center mb-4">
+                    <i class="bi bi-truck display-3 text-primary"></i>
+                    <h5 class="mt-3 mb-1">Entrega Programada</h5>
+                    <p class="text-muted">Entrega estimada el <strong>{{ fecha_entrega }}</strong> entre 9:00 AM y 9:00 PM</p>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center py-2">
+                    <span class="fw-bold fs-5">Costo de entrega:</span>
+                    <span class="text-primary fw-bold" style="font-size: 1.8rem;">$3.990</span>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary w-100 py-3 mt-4" onclick="validarPaso(2)">
+                Continuar al Pago <i class="bi bi-arrow-right-circle ms-2"></i>
+            </button>
+        </div>
+
+        <!-- Paso 3: Información de Pago -->
+        <div id="paso3" style="display: none; margin-bottom: 5rem;">
+            <h3 class="fw-bold mb-4 text-center">Paso 3: Información de Pago</h3>
+            <div class="card p-4 mx-auto" style="max-width: 500px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1); background-color: #f8f9fa;">
+                <div class="text-center mb-4">
+                    <i class="bi bi-credit-card display-3 text-primary"></i>
+                    <h5 class="mt-3 mb-1">Método de Pago</h5>
+                    <p class="text-muted">Por favor, completa los datos de tu tarjeta para finalizar la compra</p>
+                </div>
+                <hr>
+
+                <div class="mb-3">
+                    <label for="id_metodo_pago" class="form-label">{{ form.metodo_pago.label }}</label>
+                    <select class="form-select" id="id_metodo_pago" name="metodo_pago" required>
+                        {% for value, label in form.metodo_pago.field.choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="text-danger" id="metodo_pago-error"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_numero_tarjeta" class="form-label">{{ form.numero_tarjeta.label }}</label>
+                    <input type="text" class="form-control" id="id_numero_tarjeta" name="numero_tarjeta" 
+                        value="{{ form.numero_tarjeta.value|default:'' }}" placeholder="XXXX XXXX XXXX XXXX" required>
+                    <div class="text-danger" id="numero_tarjeta-error"></div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div class="flex-grow-1 me-2">
+                        <label for="id_fecha_vencimiento" class="form-label">{{ form.fecha_vencimiento.label }}</label>
+                        <input type="text" class="form-control" id="id_fecha_vencimiento" name="fecha_vencimiento" 
+                            value="{{ form.fecha_vencimiento.value|default:'' }}" placeholder="MM/AA" required>
+                        <div class="text-danger" id="fecha_vencimiento-error"></div>
+                    </div>
+                    <div class="flex-grow-1 ms-2">
+                        <label for="id_codigo_seguridad" class="form-label">{{ form.codigo_seguridad.label }}</label>
+                        <input type="text" class="form-control" id="id_codigo_seguridad" name="codigo_seguridad" 
+                            value="{{ form.codigo_seguridad.value|default:'' }}" placeholder="CVV" required>
+                        <div class="text-danger" id="codigo_seguridad-error"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 mt-3">Pagar Ahora <i class="bi bi-check-circle ms-2"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    let currentStep = 1;
+
+    function validarPaso(paso) {
+        limpiarErrores();
+        let valid = true;
+
+        if (paso === 1) {
+            const fields = [
+                { id: 'id_direccion', errorId: 'direccion-error', message: 'La dirección es requerida' },
+                { id: 'id_nombre', errorId: 'nombre-error', message: 'El nombre es requerido' },
+                { id: 'id_apellidos', errorId: 'apellidos-error', message: 'Los apellidos son requeridos' },
+                { id: 'id_email', errorId: 'email-error', message: 'El correo electrónico es requerido' }
+            ];
+
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                if (!input.value.trim()) {
+                    document.getElementById(field.errorId).textContent = field.message;
+                    valid = false;
+                }
+            });
+
+            const email = document.getElementById("id_email");
+            const emailValue = email.value.trim();
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(emailValue)) {
+                document.getElementById("email-error").textContent = 'Ingrese un correo electrónico válido';
+                valid = false;
+            }
+
+            const telefono = document.getElementById("id_telefono");
+            const telefonoValue = telefono.value.replace(/\s/g, '');
+            if (telefonoValue.length !== 9) {
+                document.getElementById("telefono-error").textContent = 'Debe tener 9 dígitos en formato X XXXXXXXX';
+                valid = false;
+            }
+
+            const rut = document.getElementById("id_rut");
+            const rutValue = rut.value.replace(/\D/g, '');
+            if (rutValue.length < 8 || rutValue.length > 9) {
+                document.getElementById("rut-error").textContent = 'Debe tener entre 8 y 9 dígitos sin guiones';
+                valid = false;
+            }
+
+            const terminos = document.getElementById("id_terminos");
+            if (!terminos.checked) {
+                document.getElementById("terminos-error").textContent = 'Debes aceptar los términos y condiciones.';
+                valid = false;
+            }
+
+            if (valid) mostrarPaso(2);
+        } else if (paso === 2) {
+            mostrarPaso(3);
+        }
+    }
+
+    function validarPaso3() {
+        limpiarErrores();
+        let valid = true;
+
+        const numeroTarjeta = document.getElementById('id_numero_tarjeta');
+        const fechaVencimiento = document.getElementById('id_fecha_vencimiento');
+        const codigoSeguridad = document.getElementById('id_codigo_seguridad');
+
+        if (numeroTarjeta.value.replace(/\s/g, '').length !== 16) {
+            document.getElementById('numero_tarjeta-error').textContent = 'Debe tener 16 dígitos en formato XXXX XXXX XXXX XXXX';
+            valid = false;
+        }
+
+        if (!/^\d{2}\/\d{2}$/.test(fechaVencimiento.value)) {
+            document.getElementById('fecha_vencimiento-error').textContent = 'Formato inválido, debe ser MM/AA';
+            valid = false;
+        }
+
+        if (codigoSeguridad.value.length !== 3) {
+            document.getElementById('codigo_seguridad-error').textContent = 'El CVV debe tener 3 dígitos';
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    function limpiarErrores() {
+        document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
+    }
+
+    function mostrarPaso(paso) {
+        currentStep = paso;
+        document.getElementById('paso1').style.display = paso === 1 ? 'block' : 'none';
+        document.getElementById('paso2').style.display = paso === 2 ? 'block' : 'none';
+        document.getElementById('paso3').style.display = paso === 3 ? 'block' : 'none';
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        mostrarPaso(currentStep);
+    });
+
+    document.getElementById('id_numero_tarjeta').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 16);
+        e.target.value = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+    });
+
+    document.getElementById('id_rut').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 9);
+        e.target.value = value;
+    });
+
+    document.getElementById('id_telefono').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 9);
+        if (value.length > 1) value = value[0] + ' ' + value.slice(1);
+        e.target.value = value;
+    });
+
+    document.getElementById('id_nombre').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+    });
+    document.getElementById('id_apellidos').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+    });
+
+    document.getElementById('id_fecha_vencimiento').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        if (value.length >= 2) e.target.value = value.slice(0, 2) + '/' + value.slice(2);
+        else e.target.value = value;
+    });
+
+    document.getElementById('id_codigo_seguridad').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 3);
+        e.target.value = value;
+    });
+</script>
+{% endblock %}
