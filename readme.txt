@@ -12,7 +12,7 @@ Incluye: catálogo, carrito, pagos simulados, administración de usuarios, bolet
 💻 Instalación (Entorno Virtual)
 
 1️⃣ Clonar el repositorio
-git clone https://github.com/tu-usuario/RothenbergSports.git
+git clone https://github.com/DavidGattuso/RothenbergSports.git
 cd RothenbergSports
 2️⃣ Crear y activar entorno virtual
 python -m venv env
