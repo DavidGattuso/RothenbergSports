@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}  <!-- Cargar la biblioteca humanize -->
+{% load humanize %}
 {% load static %}
 
 {% block title %}Carrito de Compras{% endblock %}
@@ -19,7 +19,7 @@
             <table class="table table-hover align-middle shadow-sm" style="font-size: 1.3rem;">
                 <thead class="table-primary">
                     <tr>
-                        <th class="text-center" style="width: 120px;">Imagen</th> <!-- Columna de imagen más grande -->
+                        <th class="text-center" style="width: 120px;">Imagen</th>
                         <th>Producto</th>
                         <th class="text-center">Talla</th>
                         <th class="text-center">Cantidad</th>
@@ -28,15 +28,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Fila para cada producto en el carrito -->
                     {% for item in carrito.carritoitem_set.all %}
                     <tr>
-                        <!-- Columna de imagen del producto -->
+                        <!-- Imagen del producto desde la API -->
                         <td class="text-center">
-                            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" class="img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
+                            <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
                         </td>
-                        <td class="fw-semibold">{{ item.producto.nombre }}</td>
-                        <td class="text-center">{{ item.talla }}</td>
+                        <td class="fw-semibold">{{ item.nombre }}</td>
+                        <td class="text-center">{{ item.talla|default:"-" }}</td>
                         <td class="text-center">
                             <div class="d-inline-flex align-items-center">
                                 <!-- Disminuir cantidad -->
@@ -53,7 +52,9 @@
                             </div>
                         </td>
                         <!-- Subtotal basado en cantidad -->
-                        <td class="text-end fw-bold text-primary fs-4">${{ item.subtotal|floatformat:"0"|intcomma }}</td>
+                        <td class="text-end fw-bold text-primary fs-4">
+                            ${{ item.subtotal|floatformat:"0"|intcomma }}
+                        </td>
                         <td class="text-center">
                             <!-- Eliminar producto del carrito -->
                             <form method="POST" action="{% url 'eliminar_item_carrito' item.id %}">
@@ -69,17 +70,16 @@
         
         <!-- Total del carrito -->
         <div class="d-flex justify-content-between align-items-center my-4">
-            <h3 class="fw-bold text-dark" style="font-size: 2.2rem;">Total: <span class="text-primary">${{ carrito.total|floatformat:"0"|intcomma }}</span></h3>
+            <h3 class="fw-bold text-dark" style="font-size: 2.2rem;">
+                Total: <span class="text-primary">${{ carrito.total|floatformat:"0"|intcomma }}</span>
+            </h3>
             <div>
                 <a href="{% url 'hombre_index' %}" class="btn btn-outline-secondary me-3 shadow-sm px-4 py-2">
                     <i class="bi bi-arrow-left"></i> Seguir comprando
                 </a>
-                
                 {% if carrito.carritoitem_set.all %}
-                    <!-- Botón activo para pagar si hay productos -->
                     <a href="{% url 'pago' %}" class="btn btn-primary px-4 py-3 shadow-sm fs-5">Ir a pagar <i class="bi bi-credit-card"></i></a>
                 {% else %}
-                    <!-- Botón deshabilitado si el carrito está vacío -->
                     <button class="btn btn-primary px-4 py-3 fs-5" disabled>Ir a pagar</button>
                 {% endif %}
             </div>

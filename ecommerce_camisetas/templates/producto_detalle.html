@@ -6,7 +6,7 @@
     <div class="row shadow-lg rounded p-5 bg-white align-items-center">
         <!-- Imagen del producto -->
         <div class="col-lg-6 d-flex justify-content-center align-items-center mb-4 mb-lg-0">
-            <img src="{{ producto.imagen.url }}" class="img-fluid rounded shadow" alt="{{ producto.nombre }}" style="max-width: 100%; height: auto;">
+            <img src="{{ producto.imagen_url }}" class="img-fluid rounded shadow" alt="{{ producto.nombre }}" style="max-width: 100%; height: auto;">
         </div>
         
         <!-- Detalles del producto -->
@@ -73,12 +73,12 @@
             <!-- Navegación entre productos -->
             <div class="d-flex justify-content-between mt-4">
                 {% if producto_anterior %}
-                    <a href="{% url 'detalle_producto' producto_anterior.id %}" class="btn btn-outline-secondary flex-fill me-1">
+                    <a href="{% url 'detalle_producto' producto_anterior.id %}?origen={{ origen }}" class="btn btn-outline-secondary flex-fill me-1">
                         <i class="bi bi-arrow-left-circle"></i> Anterior
                     </a>
                 {% endif %}
                 {% if producto_siguiente %}
-                    <a href="{% url 'detalle_producto' producto_siguiente.id %}" class="btn btn-outline-secondary flex-fill ms-1">
+                    <a href="{% url 'detalle_producto' producto_siguiente.id %}?origen={{ origen }}" class="btn btn-outline-secondary flex-fill ms-1">
                         Siguiente <i class="bi bi-arrow-right-circle"></i>
                     </a>
                 {% endif %}

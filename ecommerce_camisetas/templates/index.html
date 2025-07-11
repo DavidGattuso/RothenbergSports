@@ -1,64 +1,45 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-{% load humanize %}  <!-- Cargar la biblioteca humanize para el filtro intcomma -->
+{% load humanize %}
 
 {% block title %}Página Principal - Tienda de Camisetas{% endblock %}
 
 {% block content %}
-    <!-- Sección de imagen promocional de Messi y Cristiano Ronaldo -->
-    <div class="row">
-        <div class="col text-center">
-            <img src="/media/img/messicristiano.png" class="img-fluid" alt="Messi y Cristiano Ronaldo" style="max-width: 100%; height: auto; margin: 20px 0;">
-            <h1 class="display-4 mt-4">¡Camisetas Exclusivas de Messi y Cristiano!</h1>
-            <p class="lead">Compra las camisetas de tus equipos favoritos y más</p>
-            <a href="{% url 'hombre_index' %}" class="btn btn-primary btn-lg mt-3">Explora la tienda</a>
+<!-- Sección de imagen promocional de Messi y Cristiano Ronaldo -->
+<div class="row">
+  <div class="col text-center">
+    <img
+      src="/media/img/messicristiano.png"
+      class="img-fluid"
+      alt="Messi y Cristiano Ronaldo"
+      style="max-width: 100%; height: auto; margin: 20px 0"
+    />
+    <h1 class="display-4 mt-4">¡Camisetas Exclusivas de Messi y Cristiano!</h1>
+    <p class="lead">Compra las camisetas de tus equipos favoritos y más</p>
+    <a href="{% url 'hombre_index' %}" class="btn btn-primary btn-lg mt-3">Explora la tienda</a>
+  </div>
+</div>
+
+<!-- Sección de camisetas destacadas -->
+<div class="container my-5">
+  <div class="row g-4">
+    {% for producto in camisetas_index %}
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm bg-dark text-light p-3 rounded-3">
+        <img src="{{ producto.imagen_url }}" class="card-img-top img-fluid rounded mb-3" alt="{{ producto.nombre }}" style="width: 100%; height: 350px; object-fit: contain"/>
+        <div class="card-body text-center d-flex flex-column">
+          <h4 class="card-title text-warning">{{ producto.nombre }}</h4>
+          <p class="card-text">{{ producto.descripcion }}</p>
+          <p class="card-text fw-bold">Precio: ${{ producto.precio_redondeado|intcomma }}</p>
+          <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-warning mt-auto fw-bold rounded-pill">Ver más</a>
         </div>
+      </div>
     </div>
-
-    <!-- Sección de camisetas destacadas para cada categoría -->
-    <div class="container my-5">
-        <div class="row g-4">
-            <!-- Camiseta destacada para Hombre -->
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm bg-dark text-light p-3 rounded-3">
-                    <img src="{{ productos_hombre.0.imagen.url }}" class="card-img-top img-fluid rounded mb-3" alt="{{ productos_hombre.0.nombre }}" style="width: 100%; height: 350px; object-fit: contain;">
-                    <div class="card-body text-center d-flex flex-column">
-                        <h4 class="card-title text-warning">Camiseta Hombre</h4>
-                        <h5 class="card-text">{{ productos_hombre.0.nombre }}</h5>
-                        <p class="card-text">{{ productos_hombre.0.descripcion }}</p>
-                        <p class="card-text fw-bold">Precio: ${{ productos_hombre.0.precio_redondeado|intcomma }}</p>
-                        <a href="{% url 'detalle_producto' productos_hombre.0.id %}" class="btn btn-outline-warning mt-auto fw-bold rounded-pill">Ver más</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Camiseta destacada para Mujer -->
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm bg-dark text-light p-3 rounded-3">
-                    <img src="{{ productos_mujer.0.imagen.url }}" class="card-img-top img-fluid rounded mb-3" alt="{{ productos_mujer.0.nombre }}" style="width: 100%; height: 350px; object-fit: contain;">
-                    <div class="card-body text-center d-flex flex-column">
-                        <h4 class="card-title text-warning">Camiseta Mujer</h4>
-                        <h5 class="card-text">{{ productos_mujer.0.nombre }}</h5>
-                        <p class="card-text">{{ productos_mujer.0.descripcion }}</p>
-                        <p class="card-text fw-bold">Precio: ${{ productos_mujer.0.precio_redondeado|intcomma }}</p>
-                        <a href="{% url 'detalle_producto' productos_mujer.0.id %}" class="btn btn-outline-warning mt-auto fw-bold rounded-pill">Ver más</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Camiseta destacada para Niño -->
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm bg-dark text-light p-3 rounded-3">
-                    <img src="{{ productos_ninos.0.imagen.url }}" class="card-img-top img-fluid rounded mb-3" alt="{{ productos_ninos.0.nombre }}" style="width: 100%; height: 350px; object-fit: contain;">
-                    <div class="card-body text-center d-flex flex-column">
-                        <h4 class="card-title text-warning">Camiseta Niño</h4>
-                        <h5 class="card-text">{{ productos_ninos.0.nombre }}</h5>
-                        <p class="card-text">{{ productos_ninos.0.descripcion }}</p>
-                        <p class="card-text fw-bold">Precio: ${{ productos_ninos.0.precio_redondeado|intcomma }}</p>
-                        <a href="{% url 'detalle_producto' productos_ninos.0.id %}" class="btn btn-outline-warning mt-auto fw-bold rounded-pill">Ver más</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% empty %}
+      <div class="col-12">
+        <p class="text-center text-danger">No hay camisetas destacadas configuradas.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}

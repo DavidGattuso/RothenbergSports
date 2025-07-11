@@ -7,9 +7,9 @@ urlpatterns = [
     path('', views.index, name='index'),
 
     # Rutas para categorías específicas de camisetas
-    path('hombre/', views.hombre_view, name='hombre_index'),
-    path('mujer/', views.mujer_view, name='mujer_index'),
-    path('ninos/', views.ninos_view, name='ninos_index'),
+    path('hombre/', views.hombre_index, name='hombre_index'),
+    path('mujer/', views.mujer_index, name='mujer_index'),
+    path('ninos/', views.ninos_index, name='ninos_index'),
 
     # Detalle de producto específico
     path('producto/<int:producto_id>/', views.detalle_producto, name='detalle_producto'),

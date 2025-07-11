@@ -38,8 +38,9 @@ class CarritoAdmin(admin.ModelAdmin):
 
 # Personalización de la vista de CarritoItem en el admin
 class CarritoItemAdmin(admin.ModelAdmin):
-    list_display = ('carrito', 'producto', 'cantidad')
-    search_fields = ('producto__nombre', 'carrito__usuario__username')  # Búsqueda avanzada
+    list_display = ('carrito', 'nombre', 'talla', 'cantidad', 'precio')
+    search_fields = ('nombre', 'carrito__usuario__username', 'producto_id_externo')
+
 
 
 # Personalización de la vista de UserProfile en el admin
