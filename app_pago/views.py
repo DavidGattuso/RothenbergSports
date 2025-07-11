@@ -1,15 +1,22 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from datetime import date, timedelta
+import tempfile
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
 
-from .models import Pedido, PedidoItem, DireccionEnvio, Pago
-from ecommerce_camisetas.models import Carrito
 from .forms import ProcesoPagoForm
-from io import BytesIO
-from weasyprint import HTML
+from .models import Pedido, PedidoItem, DireccionEnvio, Pago
+from .utils.pdf_utils import generate_pdf_sync
+from ecommerce_camisetas.models import Carrito
+
+
+
+
+
+
 
 # Proceso de pago para finalizar la compra
 @login_required
@@ -107,11 +114,17 @@ def descargar_boleta(request, pedido_id):
         'items': items,
         'pago': pago,
     }
-    html_string = render_to_string(template_path, context)
-    pdf_io = BytesIO()
-    HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf(target=pdf_io)
 
-    pdf_io.seek(0)  # Volver al inicio del stream
-    response = HttpResponse(pdf_io.read(), content_type='application/pdf')
+    # Render HTML desde template
+    html_string = render_to_string(template_path, context)
+
+    # Crear PDF temporal con Playwright
+    with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp_pdf:
+        generate_pdf_sync(html_string, tmp_pdf.name)
+        tmp_pdf.seek(0)
+        pdf_data = tmp_pdf.read()
+
+    # Enviar respuesta PDF
+    response = HttpResponse(pdf_data, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="boleta_{pedido_id}.pdf"'
     return response
