@@ -54,16 +54,16 @@
             {% for item in items %}
             <tr>
                 <td>
-                    <!-- Cargar la imagen del producto en el PDF -->
-                    <img src="{{ item.producto.imagen_url }}" alt="{{ item.producto.nombre }}" style="width: 90px; height: 90px; object-fit: cover;">
+                    <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" style="width: 90px; height: 90px; object-fit: cover;">
                 </td>
-                <td>{{ item.producto.nombre }}</td>
+                <td>{{ item.nombre }}</td>
                 <td>{{ item.talla }}</td>
                 <td>{{ item.cantidad }}</td>
                 <td>${{ item.subtotal|floatformat:"0"|intcomma }}</td>
             </tr>
             {% endfor %}
         </tbody>
+
     </table>
 </div>
 

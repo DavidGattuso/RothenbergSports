@@ -116,15 +116,18 @@
                         {% for item in items %}
                         <tr class="border-bottom">
                             <td class="text-center">
-                                <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" class="img-thumbnail rounded shadow-sm" style="width: 90px; height: 90px; object-fit: contain;">
+                                <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="img-thumbnail rounded shadow-sm" style="width: 90px; height: 90px; object-fit: contain;">
                             </td>
-                            <td class="fw-bold fs-5 text-dark">{{ item.producto.nombre }}</td>
+                            <td class="fw-bold fs-5 text-dark">{{ item.nombre }}</td>
                             <td class="text-center text-secondary">{{ item.talla }}</td>
                             <td class="text-center">{{ item.cantidad }}</td>
-                            <td class="text-end fw-bold text-primary fs-4">${{ item.subtotal|floatformat:"0"|intcomma }}</td>
+                            <td class="text-end fw-bold text-primary fs-4">
+                                ${{ item.subtotal|floatformat:"0"|intcomma }}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
+
                 </table>
             </div>
         </div>

@@ -40,13 +40,19 @@ class Pedido(models.Model):
 # Modelo para los items dentro de cada pedido, vinculados a productos específicos
 class PedidoItem(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='items')
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, null=True, blank=True)
+    producto_id_externo = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=255)
+    descripcion = models.TextField(blank=True, null=True)
+    imagen_url = models.URLField()
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad = models.PositiveIntegerField(default=1)
-    talla = models.CharField(max_length=5, null=True, blank=True)  # Talla del producto
+    talla = models.CharField(max_length=5, null=True, blank=True)
 
+    @property
     def subtotal(self):
-        # Calcula el subtotal de cada ítem en el pedido
-        return self.cantidad * self.producto.precio
+        return self.precio * self.cantidad
+
+
 
 
 # Modelo para los pagos de los pedidos, incluye información de la tarjeta y el método de pago
