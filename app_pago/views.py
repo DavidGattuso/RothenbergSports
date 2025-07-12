@@ -13,11 +13,6 @@ from .utils.pdf_utils import generate_pdf_sync
 from ecommerce_camisetas.models import Carrito
 
 
-
-
-
-
-
 # Proceso de pago para finalizar la compra
 @login_required
 def proceso_pago(request):
