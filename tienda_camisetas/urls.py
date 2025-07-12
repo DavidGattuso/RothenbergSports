@@ -25,7 +25,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),   # Acceso al admin
     path('', include('ecommerce_camisetas.urls')),  # URLs de ecommerce_camisetas
     path('app_pago/', include('app_pago.urls')),    # URLs de app_pago
-    path('api/', include('api_camisetas.urls')),  # Incluye las rutas de la app api_camisetas
     path('panel-admin/', include('app_admin.urls')),  # Rutas personalizadas para admin
 ]
 

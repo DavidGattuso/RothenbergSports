@@ -39,18 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'ecommerce_camisetas',   # app de la aplicacion 1
-    'app_pago', # app de la aplicacion 2
-    'api_camisetas', # app de la aplicacion 3, para consumir el api de las camisetas
-    'app_admin', # app de la aplicacion 4
-    'rest_framework',  # app api rest 
+    'ecommerce_camisetas',   
+    'app_pago', 
+    'app_admin', 
+    'rest_framework',  
 
 ]
-
-
-
-# solo para probar en ambiente local
-SECRET_API_TOKEN = '1234567890abcdef'
 
 
 MIDDLEWARE = [
