@@ -96,7 +96,7 @@ def detalles_pedido(request, pedido_id):
         'pago': pago,
     })
 
-# Vista para generar y descargar la boleta en PDF con WeasyPrint
+# Vista para generar y descargar la boleta en PDF con Playwright
 @login_required
 def descargar_boleta(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id, usuario=request.user)

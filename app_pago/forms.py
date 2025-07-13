@@ -4,9 +4,9 @@ from .models import Pedido
 
 class ProcesoPagoForm(forms.ModelForm):
     # Formulario de proceso de pago, incluyendo detalles de envío y pago
-    direccion = forms.CharField(label='Dirección de Envío')  # Dirección para el envío del pedido
-    nombre = forms.CharField(label='Nombre')  # Nombre del cliente
-    apellidos = forms.CharField(label='Apellidos')  # Apellidos del cliente
+    direccion = forms.CharField(label='Dirección de Envío')  
+    nombre = forms.CharField(label='Nombre')  
+    apellidos = forms.CharField(label='Apellidos')  
     email = forms.EmailField(
         label='Correo Electrónico',
         widget=forms.EmailInput(attrs={
@@ -21,14 +21,14 @@ class ProcesoPagoForm(forms.ModelForm):
             'placeholder': '9 12345678',
             'class': 'form-control'
         })
-    )  # Teléfono de contacto del cliente
+    )  
     rut = forms.CharField(
         label='RUT',
         widget=forms.TextInput(attrs={
             'placeholder': '12345678-9',
             'class': 'form-control'
         })
-    )  # RUT del cliente
+    )  
     terminos = forms.BooleanField(label='Acepto los términos y condiciones')  # Aceptación de términos
 
     # Campos para detalles de pago

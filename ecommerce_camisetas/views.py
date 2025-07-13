@@ -40,10 +40,7 @@ def hombre_index(request):
         resp = requests.get(f"{API_URL}/{id_}", headers=HEADERS)
         if resp.status_code == 200:
             producto = resp.json()
-            # Adaptar para el template
-            # Si imagen viene como string, lo dejamos así:
             producto["imagen_url"] = producto.get("imagen", "")
-            # Usar 'valor' como precio, y redondear si es necesario
             producto["precio_redondeado"] = round(producto.get("valor", 0))
             productos_hombre.append(producto)
     return render(request, "hombre_index.html", {"productos_hombre": productos_hombre})
@@ -79,8 +76,6 @@ def ninos_index(request):
 # Adaptar a API
 def detalle_producto(request, producto_id):
     producto_id = int(producto_id)
-    # Detecta desde qué sección viene el usuario, o usa un parámetro GET o una convención de URL
-    # Ejemplo: puedes pasar un parámetro ?origen=hombre en el botón "Ver más"
     origen = request.GET.get("origen", "index")
 
     # Elige la lista de IDs según la sección
@@ -141,8 +136,6 @@ def detalle_producto(request, producto_id):
     })
 
 
-
-
 # Vista para buscar productos por nombre
 def buscar(request):
     query = request.GET.get('q', '').strip()
@@ -200,8 +193,6 @@ def buscar(request):
     })
 
 
-
-
 # Registro de usuarios
 def register_view(request):
     if request.method == 'POST':
@@ -226,10 +217,6 @@ def register_view(request):
     else:
         form = RegistrationForm()
     return render(request, 'register.html', {'form': form})
-
-
-
-
 
 
 # Manejo de login de usuario
