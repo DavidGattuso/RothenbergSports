@@ -37,7 +37,7 @@ cd RothenbergSports
 
 code .
 
-2. Crea y activa un entorno virtual (venv)
+### 2. Crea y activa un entorno virtual (venv)
 <details> <summary>Windows</summary>
 
 python -m venv venv
@@ -47,11 +47,12 @@ python -m venv venv
 python3 -m venv venv
 source venv/bin/activate
 </details>
-3. Instala las dependencias del proyecto
+
+### 3. Instala las dependencias del proyecto
 
 pip install -r requirements.txt
 
-4. Instala los navegadores de Playwright (solo una vez)
+### 4. Instala los navegadores de Playwright (solo una vez)
 
 python -m playwright install
 
@@ -59,11 +60,13 @@ Esto es obligatorio para generar PDFs con Chromium headless.
 NO necesitas instalar WeasyPrint ni librerías nativas.
 
 🛠️ Configuración de la base de datos
-Abre XAMPP y activa MariaDB.
 
-Ve a phpMyAdmin y crea la base de datos llamada:
+1. Abre XAMPP y activa MariaDB.
+
+2. Ve a phpMyAdmin y crea la base de datos llamada:
 
 tienda_camisetas
+
 NO crees tablas a mano: Django se encarga de todo con migraciones.
 
 🗂️ Migraciones y usuario admin
@@ -105,6 +108,7 @@ Luego crea su perfil (UserProfiles)
 
 📁 Estructura del proyecto
 
+```text
 RothenbergSports/
 ├── app_admin/               # Administración extendida
 ├── app_pago/                # Lógica de compras y generación de boletas PDF
@@ -116,3 +120,4 @@ RothenbergSports/
 ├── manage.py
 ├── requirements.txt
 └── .gitignore
+```
