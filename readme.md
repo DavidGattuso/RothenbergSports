@@ -32,8 +32,11 @@ _Django + MariaDB + API externa_
 ### 1. Clona el repositorio y entra a la carpeta
 
 git clone https://github.com/DavidGattuso/RothenbergSports.git
+
 cd RothenbergSports
+
 code .
+
 2. Crea y activa un entorno virtual (venv)
 <details> <summary>Windows</summary>
 
