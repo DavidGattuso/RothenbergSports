@@ -75,7 +75,19 @@
                                 <td>{{ pedido.direccion_envio.direccion }}</td>
                                 <td>${{ pedido.total|floatformat:"0"|intcomma }}</td>
                                 <td>
-                                    <span class="badge {% if pedido.estado == 'Entregado' %}bg-success{% else %}bg-warning{% endif %}">
+                                    <span class="badge
+                                        {% if pedido.estado == 'Producto entregado' %}
+                                            bg-success
+                                        {% elif pedido.estado == 'En camino a tu dirección' %}
+                                            bg-primary
+                                        {% elif pedido.estado == 'Entregado a transportista' %}
+                                            bg-info
+                                        {% elif pedido.estado == 'Preparando pedido' %}
+                                            bg-warning
+                                        {% else %}
+                                            bg-secondary
+                                        {% endif %}
+                                    ">
                                         {{ pedido.estado }}
                                     </span>
                                 </td>
@@ -93,7 +105,7 @@
             </div>
         </div>
     </div>
-</div>
+
 
 <!-- Modal de confirmación de eliminación de cuenta -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">

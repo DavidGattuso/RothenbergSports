@@ -247,7 +247,20 @@ def perfil_usuario(request):
         messages.error(request, 'No se encontró el perfil. Por favor, complete su información.')
         return redirect('crear_perfil')
     pedidos = Pedido.objects.filter(usuario=request.user)
+
+    # 🔵 Consulta el estado actualizado para cada pedido
+    for pedido in pedidos:
+        API_PEDIDO_ESTADO_URL = f"http://localhost:8001/pedido/{pedido.id}"
+        try:
+            response = requests.get(API_PEDIDO_ESTADO_URL, timeout=5)
+            if response.status_code == 200:
+                pedido_api = response.json()
+                pedido.estado = pedido_api.get('estado', pedido.estado)
+        except Exception as e:
+            print(f"Error consultando estado del pedido {pedido.id} en API externa: {e}")
+
     return render(request, 'perfil.html', {'profile': profile, 'pedidos': pedidos})
+
 
 
 # Vista de logout
