@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Crear Usuario{% endblock %}
 
@@ -8,7 +9,7 @@
         <h2 class="text-center mb-4">Crear Usuario</h2>
 
         <!-- Formulario de creación de usuario -->
-        <form method="post" class="row g-4"> 
+        <form method="post" class="row g-4">
             {% csrf_token %}
 
             <!-- Campo de correo electrónico -->
@@ -25,8 +26,7 @@
             <div class="col-md-6">
                 <label for="first_name" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="first_name" name="first_name" 
-                       placeholder="Tu nombre" pattern="[A-Za-z\s]+" title="Solo letras y espacios."
-                       value="{{ form.first_name.value|default:'' }}" required>
+                       placeholder="Tu nombre" value="{{ form.first_name.value|default:'' }}" required pattern="[A-Za-z\s]+">
                 {% for error in form.first_name.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
@@ -36,8 +36,7 @@
             <div class="col-md-6">
                 <label for="last_name" class="form-label">Apellido</label>
                 <input type="text" class="form-control" id="last_name" name="last_name" 
-                       placeholder="Tu apellido" pattern="[A-Za-z\s]+" title="Solo letras y espacios."
-                       value="{{ form.last_name.value|default:'' }}" required>
+                       placeholder="Tu apellido" value="{{ form.last_name.value|default:'' }}" required pattern="[A-Za-z\s]+">
                 {% for error in form.last_name.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
@@ -57,8 +56,7 @@
             <div class="col-md-6">
                 <label for="birth_date" class="form-label">Fecha de Nacimiento</label>
                 <input type="text" class="form-control" id="birth_date" name="birth_date" 
-                       placeholder="DD/MM/AAAA" value="{{ form.birth_date.value|default:'' }}" required 
-                       pattern="\d{2}/\d{2}/\d{4}">
+                       placeholder="DD/MM/AAAA" value="{{ form.birth_date.value|default:'' }}" required pattern="\d{2}/\d{2}/\d{4}">
                 {% for error in form.birth_date.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
@@ -91,42 +89,7 @@
     </div>
 </div>
 
-<script>
-    // Validación de formato de teléfono en tiempo real
-    document.getElementById('phone').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '').slice(0, 9); 
-        if (value.length > 1) {
-            value = value[0] + ' ' + value.slice(1); 
-        }
-        e.target.value = value;
-    });
+<!-- static/js -->
+<script src="{% static 'js/crear_usuario.js' %}"></script>
 
-    // Validación de formato de fecha de nacimiento en tiempo real
-    document.getElementById('birth_date').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '').slice(0, 8);
-        let formatted = '';
-        if (value.length > 2) {
-            formatted = value.slice(0, 2) + '/';
-            if (value.length > 4) {
-                formatted += value.slice(2, 4) + '/';
-                formatted += value.slice(4, 8);
-            } else {
-                formatted += value.slice(2);
-            }
-        } else {
-            formatted = value;
-        }
-        e.target.value = formatted;
-    });
-
-    // Restringir caracteres en el campo de nombre a letras y espacios
-    document.getElementById('first_name').addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
-    });
-
-    // Restringir caracteres en el campo de apellido a letras y espacios
-    document.getElementById('last_name').addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
-    });
-</script>
 {% endblock %}
