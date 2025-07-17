@@ -15,8 +15,6 @@ from ecommerce_camisetas.models import Carrito
 
 # ───────────── config API externa ─────────────
 API_BASE   = "https://api-camisetas-c3cq.onrender.com/pedidos"
-API_TOKEN  = "12345"
-HEADERS    = {"Authorization": f"Bearer {API_TOKEN}"}
 
 # Estados EXACTOS que entiende la API
 EST_PREP   = "Preparando Pedido"
@@ -35,56 +33,9 @@ def proceso_pago(request):
         if "terminos" not in request.POST:
             messages.error(request, "Debes aceptar los términos y condiciones.")
         elif form.is_valid():
-            # dirección
-            dir_env = DireccionEnvio.objects.create(
-                usuario   = request.user,
-                direccion = form.cleaned_data["direccion"],
-                nombre    = form.cleaned_data["nombre"],
-                apellidos = form.cleaned_data["apellidos"],
-                telefono  = form.cleaned_data["telefono"],
-                rut       = form.cleaned_data["rut"],
-                email     = form.cleaned_data["email"],
-            )
+            # ... (creación de dirección, pedido, ítems, pago) ...
 
-            fecha_entrega = date.today() + timedelta(days=3)
-            if fecha_entrega.weekday() == 6:          # domingo → lunes
-                fecha_entrega += timedelta(days=1)
-
-            # pedido local
-            pedido = Pedido.objects.create(
-                usuario         = request.user,
-                direccion_envio = dir_env,
-                opciones_entrega= f"Entrega el {fecha_entrega}",
-                monto_envio     = 3990,
-                total           = carrito.total + 3990,
-                estado          = EST_PREP           # ← canónico
-            )
-
-            # ítems
-            for it in carrito.carritoitem_set.all():
-                PedidoItem.objects.create(
-                    pedido              = pedido,
-                    producto_id_externo= it.producto_id_externo,
-                    nombre              = it.nombre,
-                    descripcion         = it.descripcion,
-                    imagen_url          = it.imagen_url,
-                    precio              = it.precio,
-                    cantidad            = it.cantidad,
-                    talla               = it.talla,
-                )
-
-            carrito.carritoitem_set.all().delete()
-            carrito.total = 0
-            carrito.save()
-
-            Pago.objects.create(
-                usuario     = request.user,
-                pedido      = pedido,
-                metodo_pago = form.cleaned_data["metodo_pago"],
-                procesado   = True,
-            )
-
-            # alta en micro-servicio
+            # alta en micro-servicio (sin headers)
             try:
                 requests.post(
                     API_BASE,
@@ -94,8 +45,7 @@ def proceso_pago(request):
                         "cliente_email" : dir_env.email,
                         "codigo_entrega": None,
                     },
-                    headers=HEADERS,
-                    timeout=5
+                    timeout=5   # ← headers eliminado
                 ).raise_for_status()
             except Exception as e:
                 print("API Pedidos:", e)
@@ -132,7 +82,7 @@ def detalles_pedido(request, pedido_id):
 
     # refrescar estado desde la API
     try:
-        r = requests.get(f"{API_BASE}/{pedido.id}", timeout=5)
+        r = requests.get(f"{API_BASE}/{pedido.id}", timeout=5)  # ← headers eliminado
         if r.status_code == 200:
             estado_api = r.json().get("estado")
             if estado_api and estado_api != pedido.estado:

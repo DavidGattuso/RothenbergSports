@@ -7,23 +7,19 @@ from django.http import HttpResponseRedirect
 import requests
 from .models import Producto, Carrito, CarritoItem, UserProfile
 from .forms import UserProfileUpdateForm, RegistrationForm
-from app_pago.models import Pedido  # Importación del modelo Pedido desde app_pago
-
+from app_pago.models import Pedido  
 
 API_URL = "https://api-camisetas-c3cq.onrender.com/camisetas"
-API_TOKEN = "12345"
-HEADERS = {"Authorization": f"Bearer {API_TOKEN}"}
 
 CAMISETAS_INDEX_IDS = [229, 318, 340]
 CAMISETAS_HOMBRE_IDS = [229, 183, 218, 185, 224, 209, 28, 41, 92, 81, 269, 290, 114, 125, 123, 131, 152, 168, 16, 48, 94]
 CAMISETAS_MUJER_IDS = [305, 318, 320, 316, 323, 326, 325, 312, 330, 315, 308, 314]
 CAMISETAS_NINOS_IDS = [335, 333, 334, 340, 350, 345, 343, 339, 336]
 
-
 def index(request):
     camisetas_index = []
     for id_ in CAMISETAS_INDEX_IDS:
-        resp = requests.get(f"{API_URL}/{id_}", headers=HEADERS)
+        resp = requests.get(f"{API_URL}/{id_}")
         if resp.status_code == 200:
             producto = resp.json()
             producto["imagen_url"] = producto.get("imagen", "")
@@ -33,11 +29,10 @@ def index(request):
         'camisetas_index': camisetas_index,
     })
 
-# Vistas de productos por categoría
 def hombre_index(request):
     productos_hombre = []
     for id_ in CAMISETAS_HOMBRE_IDS:
-        resp = requests.get(f"{API_URL}/{id_}", headers=HEADERS)
+        resp = requests.get(f"{API_URL}/{id_}")
         if resp.status_code == 200:
             producto = resp.json()
             producto["imagen_url"] = producto.get("imagen", "")
@@ -45,12 +40,10 @@ def hombre_index(request):
             productos_hombre.append(producto)
     return render(request, "hombre_index.html", {"productos_hombre": productos_hombre})
 
-
-
 def mujer_index(request):
     productos_mujer = []
     for id_ in CAMISETAS_MUJER_IDS:
-        resp = requests.get(f"{API_URL}/{id_}", headers=HEADERS)
+        resp = requests.get(f"{API_URL}/{id_}")
         if resp.status_code == 200:
             producto = resp.json()
             producto["imagen_url"] = producto.get("imagen", "")
@@ -58,12 +51,10 @@ def mujer_index(request):
             productos_mujer.append(producto)
     return render(request, "mujer_index.html", {"productos_mujer": productos_mujer})
 
-
-
 def ninos_index(request):
     productos_ninos = []
     for id_ in CAMISETAS_NINOS_IDS:
-        resp = requests.get(f"{API_URL}/{id_}", headers=HEADERS)
+        resp = requests.get(f"{API_URL}/{id_}")
         if resp.status_code == 200:
             producto = resp.json()
             producto["imagen_url"] = producto.get("imagen", "")
@@ -71,14 +62,9 @@ def ninos_index(request):
             productos_ninos.append(producto)
     return render(request, "ninos_index.html", {"productos_ninos": productos_ninos})
 
-
-
-# Adaptar a API
 def detalle_producto(request, producto_id):
     producto_id = int(producto_id)
     origen = request.GET.get("origen", "index")
-
-    # Elige la lista de IDs según la sección
     if origen == "hombre":
         id_list = CAMISETAS_HOMBRE_IDS
     elif origen == "mujer":
@@ -88,8 +74,7 @@ def detalle_producto(request, producto_id):
     else:
         id_list = CAMISETAS_INDEX_IDS
 
-    # Busca el producto en la API
-    resp = requests.get(f"{API_URL}/{producto_id}", headers=HEADERS)
+    resp = requests.get(f"{API_URL}/{producto_id}")
     if resp.status_code != 200:
         from django.http import Http404
         raise Http404("Producto no encontrado")
@@ -97,7 +82,6 @@ def detalle_producto(request, producto_id):
     producto["imagen_url"] = producto.get("imagen", "")
     producto["precio_redondeado"] = round(producto.get("valor", 0))
 
-    # Anterior y siguiente SOLO en los predeterminados
     try:
         idx = id_list.index(producto_id)
     except ValueError:
@@ -107,19 +91,16 @@ def detalle_producto(request, producto_id):
     producto_siguiente = None
     if idx != -1:
         if idx > 0:
-            # Busca el producto anterior en la API
             pid = id_list[idx - 1]
-            r_ant = requests.get(f"{API_URL}/{pid}", headers=HEADERS)
+            r_ant = requests.get(f"{API_URL}/{pid}")
             if r_ant.status_code == 200:
                 producto_anterior = r_ant.json()
         if idx < len(id_list) - 1:
-            # Busca el producto siguiente en la API
             pid = id_list[idx + 1]
-            r_sig = requests.get(f"{API_URL}/{pid}", headers=HEADERS)
+            r_sig = requests.get(f"{API_URL}/{pid}")
             if r_sig.status_code == 200:
                 producto_siguiente = r_sig.json()
 
-    # Tallas estáticas o dinámicas según lo que tengas
     tallas_disponibles = [
         {"talla": "S", "get_talla_display": "S"},
         {"talla": "M", "get_talla_display": "M"},
@@ -135,37 +116,30 @@ def detalle_producto(request, producto_id):
         'origen': origen, 
     })
 
-
-# Vista para buscar productos por nombre
 def buscar(request):
     query = request.GET.get('q', '').strip()
     productos_hombre, productos_mujer, productos_ninos = [], [], []
 
-    headers = {"Authorization": f"Bearer {API_TOKEN}"}
-
     if query:
-        url_hombre = f"{API_URL}/?genero=Masculino&nombre={query}"
-        url_mujer = f"{API_URL}/?genero=Femenino&nombre={query}"
-        url_ninos = f"{API_URL}/?genero=Niños&nombre={query}"
+        url_hombre = f"{API_URL}?genero=Masculino&nombre={query}"
+        url_mujer  = f"{API_URL}?genero=Femenino&nombre={query}"
+        url_ninos  = f"{API_URL}?genero=Niños&nombre={query}"
 
-        # Hombres
-        resp = requests.get(url_hombre, headers=headers)
+        resp = requests.get(url_hombre)
         if resp.status_code == 200:
             productos_hombre = resp.json()
             for p in productos_hombre:
                 p["imagen_url"] = p.get("imagen", "")
                 p["precio_redondeado"] = round(p.get("valor", 0))
 
-        # Mujeres
-        resp = requests.get(url_mujer, headers=headers)
+        resp = requests.get(url_mujer)
         if resp.status_code == 200:
             productos_mujer = resp.json()
             for p in productos_mujer:
                 p["imagen_url"] = p.get("imagen", "")
                 p["precio_redondeado"] = round(p.get("valor", 0))
 
-        # Niños
-        resp = requests.get(url_ninos, headers=headers)
+        resp = requests.get(url_ninos)
         if resp.status_code == 200:
             productos_ninos = resp.json()
             for p in productos_ninos:
@@ -321,16 +295,14 @@ def agregar_al_carrito(request, producto_id):
     talla_seleccionada = request.POST.get('talla')
     carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
 
-    # --- AQUÍ es donde debes colocar la petición a la API ---
     try:
-        response = requests.get(f"{API_URL}/{producto_id}/", headers=HEADERS)
+        response = requests.get(f"{API_URL}/{producto_id}/")
         response.raise_for_status()
         data = response.json()
     except Exception as e:
         messages.error(request, "No se pudo obtener el producto desde la API.")
         return redirect('ver_carrito')
 
-    # --- Crear el ítem del carrito con los datos de la API ---
     item, created = CarritoItem.objects.get_or_create(
         carrito=carrito,
         producto_id_externo=producto_id,
@@ -382,9 +354,3 @@ def eliminar_item_carrito(request, item_id):
     item.carrito.total = sum(i.subtotal() for i in item.carrito.carritoitem_set.all())
     item.carrito.save()
     return redirect('ver_carrito')
-
-
-
-
-
-
