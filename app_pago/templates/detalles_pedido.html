@@ -15,53 +15,94 @@
             <h5 class="mb-0">Estado del Pedido</h5>
         </div>
         <div class="card-body">
-            <div class="d-flex justify-content-between text-center">
+            <div class="d-flex justify-content-between text-center align-items-start">
+                {% with estado=pedido.estado|lower %}
+                
                 <!-- Paso 1: Preparando Pedido -->
                 <div class="d-flex flex-column align-items-center">
-                    {% if pedido.estado == 'Preparando pedido' %}
-                        <i class="bi bi-box-seam text-warning display-6"></i>
-                        <span class="fw-bold mt-2 text-warning">Preparando Pedido<small class="d-block text-warning">Actual</small></span>
+                    {% if 'preparando' in estado %}
+                        <div class="rounded-circle bg-warning shadow d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-box-seam text-white display-6"></i>
+                        </div>
+                        <span class="fw-bold mt-2 text-warning fs-5">
+                            Preparando Pedido<small class="d-block text-warning">Actual</small>
+                        </span>
                     {% else %}
-                        <i class="bi bi-box-seam text-muted display-6"></i>
+                        <div class="rounded-circle border border-2 border-secondary bg-light d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-box-seam text-muted display-6"></i>
+                        </div>
                         <span class="fw-bold mt-2 text-muted">Preparando Pedido</span>
                     {% endif %}
                 </div>
-
+                
                 <!-- Paso 2: Entregado a Transportista -->
                 <div class="d-flex flex-column align-items-center">
-                    {% if pedido.estado == 'Entregado a transportista' %}
-                        <i class="bi bi-truck text-info display-6"></i>
-                        <span class="fw-bold mt-2 text-info">Entregado a Transportista<small class="d-block text-info">Actual</small></span>
+                    {% if 'transportista' in estado %}
+                        <div class="rounded-circle bg-primary shadow d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-truck text-white display-6"></i>
+                        </div>
+                        <span class="fw-bold mt-2 text-primary fs-5">
+                            Entregado a Transportista<small class="d-block text-primary">Actual</small>
+                        </span>
                     {% else %}
-                        <i class="bi bi-truck text-muted display-6"></i>
+                        <div class="rounded-circle border border-2 border-secondary bg-light d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-truck text-muted display-6"></i>
+                        </div>
                         <span class="fw-bold mt-2 text-muted">Entregado a Transportista</span>
                     {% endif %}
                 </div>
-
+                
                 <!-- Paso 3: En Camino a tu Dirección -->
                 <div class="d-flex flex-column align-items-center">
-                    {% if pedido.estado == 'En camino a tu dirección' %}
-                        <i class="bi bi-house-door text-primary display-6"></i>
-                        <span class="fw-bold mt-2 text-primary">En Camino a tu Dirección<small class="d-block text-primary">Actual</small></span>
+                    {% if 'camino' in estado %}
+                        <div class="rounded-circle bg-success shadow d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-house-door text-white display-6"></i>
+                        </div>
+                        <span class="fw-bold mt-2 text-success fs-5">
+                            En Camino a tu Dirección<small class="d-block text-success">Actual</small>
+                        </span>
                     {% else %}
-                        <i class="bi bi-house-door text-muted display-6"></i>
+                        <div class="rounded-circle border border-2 border-secondary bg-light d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-house-door text-muted display-6"></i>
+                        </div>
                         <span class="fw-bold mt-2 text-muted">En Camino a tu Dirección</span>
                     {% endif %}
                 </div>
-
+                
                 <!-- Paso 4: Producto Entregado -->
                 <div class="d-flex flex-column align-items-center">
-                    {% if pedido.estado == 'Producto entregado' %}
-                        <i class="bi bi-check-circle text-success display-6"></i>
-                        <span class="fw-bold mt-2 text-success">Producto Entregado<small class="d-block text-success">Actual</small></span>
+                    {% if 'entregado' in estado and not 'transportista' in estado %}
+                        <div class="rounded-circle bg-dark shadow d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-check-circle text-white display-6"></i>
+                        </div>
+                        <span class="fw-bold mt-2 text-dark fs-5">
+                            Producto Entregado<small class="d-block text-dark">Actual</small>
+                        </span>
                     {% else %}
-                        <i class="bi bi-check-circle text-muted display-6"></i>
+                        <div class="rounded-circle border border-2 border-secondary bg-light d-flex align-items-center justify-content-center mb-2"
+                            style="width: 55px; height: 55px;">
+                            <i class="bi bi-check-circle text-muted display-6"></i>
+                        </div>
                         <span class="fw-bold mt-2 text-muted">Producto Entregado</span>
                     {% endif %}
                 </div>
+                
+                {% endwith %}
             </div>
         </div>
     </div>
+
+
+
+
+
 
     <!-- Información principal del pedido -->
     <div class="card shadow-sm border-0 mb-4">
@@ -94,6 +135,8 @@
             </p>
         </div>
     </div>
+
+
 
     <!-- Tabla de productos comprados mejorada -->
     <div class="card shadow-lg border-0">

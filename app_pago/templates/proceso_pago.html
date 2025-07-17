@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container">
@@ -149,136 +150,8 @@
     </form>
 </div>
 
-<script>
-    let currentStep = 1;
+<!-- static/js -->
+<script src="{% static 'js/proceso_pago.js' %}"></script>
 
-    function validarPaso(paso) {
-        limpiarErrores();
-        let valid = true;
 
-        if (paso === 1) {
-            const fields = [
-                { id: 'id_direccion', errorId: 'direccion-error', message: 'La dirección es requerida' },
-                { id: 'id_nombre', errorId: 'nombre-error', message: 'El nombre es requerido' },
-                { id: 'id_apellidos', errorId: 'apellidos-error', message: 'Los apellidos son requeridos' },
-                { id: 'id_email', errorId: 'email-error', message: 'El correo electrónico es requerido' }
-            ];
-
-            fields.forEach(field => {
-                const input = document.getElementById(field.id);
-                if (!input.value.trim()) {
-                    document.getElementById(field.errorId).textContent = field.message;
-                    valid = false;
-                }
-            });
-
-            const email = document.getElementById("id_email");
-            const emailValue = email.value.trim();
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(emailValue)) {
-                document.getElementById("email-error").textContent = 'Ingrese un correo electrónico válido';
-                valid = false;
-            }
-
-            const telefono = document.getElementById("id_telefono");
-            const telefonoValue = telefono.value.replace(/\s/g, '');
-            if (telefonoValue.length !== 9) {
-                document.getElementById("telefono-error").textContent = 'Debe tener 9 dígitos en formato X XXXXXXXX';
-                valid = false;
-            }
-
-            const rut = document.getElementById("id_rut");
-            const rutValue = rut.value.replace(/\D/g, '');
-            if (rutValue.length < 8 || rutValue.length > 9) {
-                document.getElementById("rut-error").textContent = 'Debe tener entre 8 y 9 dígitos sin guiones';
-                valid = false;
-            }
-
-            const terminos = document.getElementById("id_terminos");
-            if (!terminos.checked) {
-                document.getElementById("terminos-error").textContent = 'Debes aceptar los términos y condiciones.';
-                valid = false;
-            }
-
-            if (valid) mostrarPaso(2);
-        } else if (paso === 2) {
-            mostrarPaso(3);
-        }
-    }
-
-    function validarPaso3() {
-        limpiarErrores();
-        let valid = true;
-
-        const numeroTarjeta = document.getElementById('id_numero_tarjeta');
-        const fechaVencimiento = document.getElementById('id_fecha_vencimiento');
-        const codigoSeguridad = document.getElementById('id_codigo_seguridad');
-
-        if (numeroTarjeta.value.replace(/\s/g, '').length !== 16) {
-            document.getElementById('numero_tarjeta-error').textContent = 'Debe tener 16 dígitos en formato XXXX XXXX XXXX XXXX';
-            valid = false;
-        }
-
-        if (!/^\d{2}\/\d{2}$/.test(fechaVencimiento.value)) {
-            document.getElementById('fecha_vencimiento-error').textContent = 'Formato inválido, debe ser MM/AA';
-            valid = false;
-        }
-
-        if (codigoSeguridad.value.length !== 3) {
-            document.getElementById('codigo_seguridad-error').textContent = 'El CVV debe tener 3 dígitos';
-            valid = false;
-        }
-
-        return valid;
-    }
-
-    function limpiarErrores() {
-        document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
-    }
-
-    function mostrarPaso(paso) {
-        currentStep = paso;
-        document.getElementById('paso1').style.display = paso === 1 ? 'block' : 'none';
-        document.getElementById('paso2').style.display = paso === 2 ? 'block' : 'none';
-        document.getElementById('paso3').style.display = paso === 3 ? 'block' : 'none';
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        mostrarPaso(currentStep);
-    });
-
-    document.getElementById('id_numero_tarjeta').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '').slice(0, 16);
-        e.target.value = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
-    });
-
-    document.getElementById('id_rut').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '').slice(0, 9);
-        e.target.value = value;
-    });
-
-    document.getElementById('id_telefono').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '').slice(0, 9);
-        if (value.length > 1) value = value[0] + ' ' + value.slice(1);
-        e.target.value = value;
-    });
-
-    document.getElementById('id_nombre').addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
-    });
-    document.getElementById('id_apellidos').addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
-    });
-
-    document.getElementById('id_fecha_vencimiento').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '').slice(0, 4);
-        if (value.length >= 2) e.target.value = value.slice(0, 2) + '/' + value.slice(2);
-        else e.target.value = value;
-    });
-
-    document.getElementById('id_codigo_seguridad').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '').slice(0, 3);
-        e.target.value = value;
-    });
-</script>
 {% endblock %}
