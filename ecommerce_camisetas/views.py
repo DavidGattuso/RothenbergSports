@@ -252,7 +252,7 @@ def perfil_usuario(request):
     # 🔵 refresca cada estado contra la API plural
     for p in pedidos:
         try:
-            r = requests.get(f"http://localhost:8001/pedidos/{p.id}", timeout=5)
+            r = requests.get(f"https://api-camisetas-c3cq.onrender.com/pedidos/{p.id}", timeout=5)
             if r.status_code == 200:
                 p.estado = r.json().get("estado", p.estado)
         except Exception as e:

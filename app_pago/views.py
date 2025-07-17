@@ -14,7 +14,7 @@ from .utils.pdf_utils import generate_pdf_sync
 from ecommerce_camisetas.models import Carrito
 
 # ───────────── config API externa ─────────────
-API_BASE   = "http://localhost:8001/pedidos"
+API_BASE   = "https://api-camisetas-c3cq.onrender.com//pedidos"
 API_TOKEN  = "12345"
 HEADERS    = {"Authorization": f"Bearer {API_TOKEN}"}
 
