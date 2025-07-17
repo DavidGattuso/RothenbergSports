@@ -134,7 +134,11 @@ def detalles_pedido(request, pedido_id):
     try:
         r = requests.get(f"{API_BASE}/{pedido.id}", timeout=5)
         if r.status_code == 200:
-            pedido.estado = r.json().get("estado", pedido.estado)
+            estado_api = r.json().get("estado")
+            if estado_api and estado_api != pedido.estado:
+                pedido.estado = estado_api
+                pedido.save(update_fields=["estado"])
+
     except Exception as e:
         print("API Pedidos (GET):", e)
 
