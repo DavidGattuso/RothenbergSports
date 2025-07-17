@@ -75,21 +75,21 @@
                                 <td>{{ pedido.direccion_envio.direccion }}</td>
                                 <td>${{ pedido.total|floatformat:"0"|intcomma }}</td>
                                 <td>
-                                    <span class="badge
-                                        {% if pedido.estado == 'Producto entregado' %}
-                                            bg-success
-                                        {% elif pedido.estado == 'En camino a tu dirección' %}
-                                            bg-primary
-                                        {% elif pedido.estado == 'Entregado a transportista' %}
-                                            bg-info
-                                        {% elif pedido.estado == 'Preparando pedido' %}
-                                            bg-warning
-                                        {% else %}
-                                            bg-secondary
-                                        {% endif %}
-                                    ">
-                                        {{ pedido.estado }}
-                                    </span>
+                                <span class="badge
+                                    {% if pedido.estado == 'Producto Entregado' %}
+                                        bg-success
+                                    {% elif pedido.estado == 'En Camino a tu Dirección' %}
+                                        bg-primary
+                                    {% elif pedido.estado == 'Entregado a Transportista' %}
+                                        bg-info
+                                    {% elif pedido.estado == 'Preparando Pedido' %}
+                                        bg-warning
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ pedido.estado }}
+                                </span>
                                 </td>
                                 <td>
                                     <a href="{% url 'detalles_pedido' pedido.id %}" class="btn btn-sm btn-outline-info">Ver Detalles</a>
