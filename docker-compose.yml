@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    container_name: rothenberg_django
+    volumes:
+      - .:/app
+      - ./data:/app/data   
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    environment:
+      - USE_SQLITE=True
