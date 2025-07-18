@@ -11,6 +11,9 @@
         <!-- Formulario de inicio de sesión con validación Bootstrap -->
         <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
+            
+            {# Campo oculto para conservar el next #}
+            <input type="hidden" name="next" value="{{ next }}">
 
             <!-- Campo de entrada para el correo electrónico con validación visual -->
             <div class="mb-3">
@@ -30,12 +33,14 @@
             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
         </form>
 
-        <!-- Enlace de redirección al registro para nuevos usuarios -->
-        <p class="text-center mt-3">¿No tienes cuenta? <a href="{% url 'register' %}">Regístrate aquí</a></p>
+        <!-- Enlace de redirección al registro para nuevos usuarios, propagando next -->
+        <p class="text-center mt-3">
+            ¿No tienes cuenta?
+            <a href="{% url 'register' %}?next={{ next }}">Regístrate aquí</a>
+        </p>
     </div>
 </div>
 
-    <!-- static/js -->
-    <script src="{% static 'js/scripts.js' %}"></script>
-    
+<!-- static/js -->
+<script src="{% static 'js/scripts.js' %}"></script>
 {% endblock %}

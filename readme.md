@@ -5,7 +5,7 @@
 
 ---
 
-## 🚀 ¿Qué hace este proyecto?
+## 👕 ¿Qué hace este proyecto?
 
 * **Catálogo dinámico** (hombre, mujer, niños)
 * **Carrito** con selección de tallas
@@ -140,7 +140,7 @@ Se incluye un **Dockerfile** y un volumen Docker para persistir datos en `./data
 
 ---
 
-## 🚀 Uso con Docker Compose
+## 🐬 Uso con Docker Compose
 
 También puedes usar **Docker Compose** para simplificar comandos:
 

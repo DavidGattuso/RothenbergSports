@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 import requests
+from django.urls import reverse 
 from .models import Producto, Carrito, CarritoItem, UserProfile
 from .forms import UserProfileUpdateForm, RegistrationForm
 from app_pago.models import Pedido  
@@ -170,6 +171,9 @@ def buscar(request):
 
 # Registro de usuarios
 def register_view(request):
+    # 1) Leemos next de GET o POST
+    next_url = request.GET.get('next', request.POST.get('next', 'index'))
+
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
@@ -185,33 +189,85 @@ def register_view(request):
                 phone=form.cleaned_data['phone'],
                 birth_date=form.cleaned_data['birth_date']
             )
-            messages.success(request, "Registro exitoso. Ahora puedes iniciar sesión.")
-            return redirect('login')
+            messages.success(request, "Registro exitoso. Ahora inicia sesión para continuar.")
+            # 2) Redirigimos al login incluyendo next
+            return redirect(f"{ reverse('login') }?next={ next_url }")
         else:
             messages.error(request, "Por favor corrige los errores en el formulario.")
     else:
         form = RegistrationForm()
-    return render(request, 'register.html', {'form': form})
+
+    return render(request, 'register.html', {
+        'form': form,
+        'next': next_url,        # paso next al template
+    })
 
 
 # Manejo de login de usuario
 def login_view(request):
-    next_url = request.GET.get('next', 'index')
+    # Ahora buscamos next primero en POST, luego en GET, y por defecto 'index'
+    next_url = request.POST.get('next', request.GET.get('next', 'index'))
+
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(
+            request,
+            username=request.POST.get('username'),
+            password=request.POST.get('password')
+        )
         if user:
             login(request, user)
             messages.success(request, 'Inicio de sesión exitoso.')
-            
-            # Redirigir según el tipo de usuario
-            if user.is_staff or user.is_superuser:
-                return redirect('admin_dashboard')  # Ruta para el panel de administración
-            return redirect(next_url)  # Ruta normal para usuarios
-        messages.error(request, 'Correo o contraseña incorrectos.')
-    return render(request, 'login.html')
 
+            # —— fusión carrito sesión ——
+            carrito_sesion = request.session.pop('carrito', None)
+            if carrito_sesion:
+                carrito_real, _ = Carrito.objects.get_or_create(usuario=user)
+                for itm in carrito_sesion:
+                    prod_id = itm['producto_id']
+                    # traigo datos del producto
+                    try:
+                        r = requests.get(f"{API_URL}/{prod_id}/")
+                        r.raise_for_status()
+                        prod = r.json()
+                    except:
+                        prod = {}
+                    # extraigo campos
+                    nombre      = prod.get('nombre', '')
+                    descripcion = prod.get('descripcion', '')
+                    imagen_url  = prod.get('imagen', '')
+                    precio      = prod.get('valor', 0)
+                    cantidad    = itm['cantidad']
+                    # creo o actualizo ítem
+                    ci, created = CarritoItem.objects.get_or_create(
+                        carrito=carrito_real,
+                        producto_id_externo=prod_id,
+                        talla=itm['talla'],
+                        defaults={
+                            'nombre':      nombre,
+                            'descripcion': descripcion,
+                            'imagen_url':  imagen_url,
+                            'precio':      precio,
+                            'cantidad':    cantidad
+                        }
+                    )
+                    if not created:
+                        ci.cantidad += cantidad
+                        ci.save()
+                carrito_real.total = sum(i.subtotal() for i in carrito_real.carritoitem_set.all())
+                carrito_real.save()
+            # ————————————————————
+
+            # finalmente redirijo a next_url
+            if user.is_staff or user.is_superuser:
+                return redirect('admin_dashboard')
+            return redirect(next_url)
+
+        messages.error(request, 'Correo o contraseña incorrectos.')
+
+    # Si GET o POST inválido, renderizo login.html y le paso el next
+    return render(request, 'login.html', {
+        'next': next_url
+    })
 
 
 # Vista de perfil de usuario con historial de pedidos
@@ -302,16 +358,38 @@ def ver_carrito(request):
     return render(request, 'carrito.html', {'carrito': carrito})
 
 
-@login_required
 def agregar_al_carrito(request, producto_id):
-    talla_seleccionada = request.POST.get('talla')
-    carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
+    # ✋ Solo procesamos POST. Un GET (por ejemplo el redirect del login) va directo al carrito.
+    if request.method != 'POST':
+        return redirect('ver_carrito')
 
+    talla_seleccionada = request.POST.get('talla')
+
+    # 1) Invitado → guardo en sesión y redirijo al login
+    if not request.user.is_authenticated:
+        carrito_sesion = request.session.get('carrito', [])
+        for itm in carrito_sesion:
+            if itm['producto_id'] == producto_id and itm['talla'] == talla_seleccionada:
+                itm['cantidad'] += 1
+                break
+        else:
+            carrito_sesion.append({
+                'producto_id': producto_id,
+                'talla': talla_seleccionada,
+                'cantidad': 1
+            })
+        request.session['carrito'] = carrito_sesion
+
+        messages.info(request, 'Tu selección se ha guardado en sesión. Por favor inicia sesión para continuar.')
+        return redirect(f"{ reverse('login') }?next={ request.path }")
+
+    # 2) Usuario autenticado → lógica original
+    carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
     try:
-        response = requests.get(f"{API_URL}/{producto_id}/")
-        response.raise_for_status()
-        data = response.json()
-    except Exception as e:
+        resp = requests.get(f"{API_URL}/{producto_id}/")
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
         messages.error(request, "No se pudo obtener el producto desde la API.")
         return redirect('ver_carrito')
 
@@ -320,21 +398,20 @@ def agregar_al_carrito(request, producto_id):
         producto_id_externo=producto_id,
         talla=talla_seleccionada,
         defaults={
-            'nombre': data['nombre'],
+            'nombre':      data.get('nombre', ''),
             'descripcion': data.get('descripcion', ''),
-            'imagen_url': data['imagen'],
-            'precio': data['valor'],
-            'cantidad': 1,
+            'imagen_url':  data.get('imagen', ''),
+            'precio':      data.get('valor', 0),
+            'cantidad':    1,
         }
     )
     if not created:
         item.cantidad += 1
         item.save()
+
     carrito.total = sum(i.subtotal() for i in carrito.carritoitem_set.all())
     carrito.save()
     return redirect('ver_carrito')
-
-
 
 @login_required
 def incrementar_cantidad(request, item_id):

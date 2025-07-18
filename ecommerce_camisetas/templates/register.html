@@ -5,81 +5,84 @@
 
 {% block content %}
 <div class="container mt-5 d-flex justify-content-center">
-    <div class="card p-5 shadow-lg w-100" style="max-width: 900px;"> <!-- Ancho máximo de 900px y más padding -->
+    <div class="card p-5 shadow-lg w-100" style="max-width: 900px;">
         <h2 class="text-center mb-4">Crear Cuenta</h2>
 
         <!-- Formulario de registro -->
-        <form method="post" class="row g-4"> <!-- Espacio adicional entre campos con g-4 -->
+        <form method="post" class="row g-4">
             {% csrf_token %}
+            
+            {# Hidden para conservar el next #}
+            <input type="hidden" name="next" value="{{ next }}">
 
             <!-- Campo de correo electrónico -->
             <div class="col-12">
                 <label for="email" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="email" name="email" 
-                       placeholder="tucorreo@email.com" value="{{ form.email.value|default:'' }}" required>
+                       placeholder="tucorreo@email.com"
+                       value="{{ form.email.value|default:'' }}" required>
                 {% for error in form.email.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
 
-            <!-- Campo de nombre -->
+            <!-- Nombre -->
             <div class="col-md-6">
                 <label for="first_name" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="first_name" name="first_name" 
-                       placeholder="Tu nombre" pattern="[A-Za-z\s]+" title="Solo letras y espacios."
+                       placeholder="Tu nombre" pattern="[A-Za-z\s]+" 
                        value="{{ form.first_name.value|default:'' }}" required>
                 {% for error in form.first_name.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
 
-            <!-- Campo de apellido -->
+            <!-- Apellido -->
             <div class="col-md-6">
                 <label for="last_name" class="form-label">Apellido</label>
                 <input type="text" class="form-control" id="last_name" name="last_name" 
-                       placeholder="Tu apellido" pattern="[A-Za-z\s]+" title="Solo letras y espacios."
+                       placeholder="Tu apellido" pattern="[A-Za-z\s]+" 
                        value="{{ form.last_name.value|default:'' }}" required>
                 {% for error in form.last_name.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
 
-            <!-- Campo de teléfono -->
+            <!-- Teléfono -->
             <div class="col-md-6">
                 <label for="phone" class="form-label">Teléfono</label>
                 <input type="text" class="form-control" id="phone" name="phone" 
-                       placeholder="9 12345678" maxlength="10" value="{{ form.phone.value|default:'' }}" required>
+                       placeholder="9 12345678" maxlength="10" 
+                       value="{{ form.phone.value|default:'' }}" required>
                 {% for error in form.phone.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
 
-            <!-- Campo de fecha de nacimiento -->
+            <!-- Fecha de nacimiento -->
             <div class="col-md-6">
                 <label for="birth_date" class="form-label">Fecha de Nacimiento</label>
                 <input type="text" class="form-control" id="birth_date" name="birth_date" 
-                       placeholder="DD/MM/AAAA" value="{{ form.birth_date.value|default:'' }}" required 
-                       pattern="\d{2}/\d{2}/\d{4}">
+                       placeholder="DD/MM/AAAA" pattern="\d{2}/\d{2}/\d{4}"
+                       value="{{ form.birth_date.value|default:'' }}" required>
                 {% for error in form.birth_date.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
 
-            <!-- Campo de contraseña -->
+            <!-- Contraseña -->
             <div class="col-md-6">
                 <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" name="password" 
-                       placeholder="Introduce una contraseña" required>
+                <input type="password" class="form-control" id="password" name="password" required>
                 {% for error in form.password.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
 
-            <!-- Campo para confirmar la contraseña -->
+            <!-- Repetir contraseña -->
             <div class="col-md-6">
                 <label for="password2" class="form-label">Repetir Contraseña</label>
-                <input type="password" class="form-control" id="password2" name="password2" 
-                       placeholder="Repite la contraseña" required>
+                <input type="password" class="form-control" id="password2" name="password2" required>
                 {% for error in form.password2.errors %}
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
@@ -89,11 +92,14 @@
                 <button type="submit" class="btn btn-primary w-100 py-2">Registrarse</button>
             </div>
         </form>
+
+        <!-- Enlace a login conservando next -->
+        <p class="text-center mt-3">
+            ¿Ya tienes cuenta?
+            <a href="{% url 'login' %}?next={{ next }}">Inicia sesión aquí</a>
+        </p>
     </div>
 </div>
 
-
-<!-- static/js -->
 <script src="{% static 'js/scripts.js' %}"></script>
-
 {% endblock %}
