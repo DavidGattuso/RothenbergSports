@@ -10,6 +10,7 @@ from .forms import UserProfileUpdateForm, RegistrationForm
 from app_pago.models import Pedido  
 
 API_URL = "https://api-camisetas-c3cq.onrender.com/camisetas"
+PEDIDOS_API_BASE = "https://api-camisetas-c3cq.onrender.com/pedidos"
 
 CAMISETAS_INDEX_IDS = [229, 318, 340]
 CAMISETAS_HOMBRE_IDS = [229, 183, 218, 185, 224, 209, 28, 41, 92, 81, 269, 290, 114, 125, 123, 131, 152, 168, 16, 48, 94]
@@ -223,16 +224,27 @@ def perfil_usuario(request):
 
     pedidos = Pedido.objects.filter(usuario=request.user)
 
-    # 🔵 refresca cada estado contra la API plural
+    # 🔵 refresca cada estado contra la API usando external_id
     for p in pedidos:
+        # Si aún no se sincronizó, salto
+        if not p.external_id:
+            continue
         try:
-            r = requests.get(f"https://api-camisetas-c3cq.onrender.com/pedidos/{p.id}", timeout=5)
+            r = requests.get(f"{PEDIDOS_API_BASE}/{p.external_id}", timeout=5)
             if r.status_code == 200:
-                p.estado = r.json().get("estado", p.estado)
+                estado_api = r.json().get("estado", p.estado)
+                if estado_api != p.estado:
+                    # Actualizo el estado en la instancia y en la base de datos
+                    p.estado = estado_api
+                    p.save(update_fields=['estado'])
         except Exception as e:
-            print(f"API Pedidos (perfil) {p.id}: {e}")
+            print(f"API Pedidos (perfil) {p.external_id}: {e}")
 
-    return render(request, "perfil.html", {"profile": profile, "pedidos": pedidos})
+    return render(request, "perfil.html", {
+        "profile": profile,
+        "pedidos": pedidos,
+    })
+
 
 
 
