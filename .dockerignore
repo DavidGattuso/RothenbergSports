@@ -1,0 +1,41 @@
+# No incluir control de versiones
+.git
+.gitignore
+.dockerignore   # **añadido**
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+ENV/
+
+# Variables de entorno
+.env             # **añadido**
+.env.*           # **añadido**
+
+# Base de datos local
+db.sqlite3
+data/
+*.sqlite3
+*.db
+
+# Logs y cachés de testing
+*.log           # **añadido**
+logs/           # **añadido**
+.pytest_cache/  # **añadido**
+.coverage       # **añadido**
+htmlcov/        # **añadido**
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Si usas Docker Compose override
+docker-compose.override.yml  # **añadido si existe**
