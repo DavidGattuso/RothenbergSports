@@ -3,15 +3,6 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.pyc
-
-# MacOS basura
-.DS_Store
-__MACOSX/
-
-# Django runtime
-db.sqlite3
-/staticfiles/
 
 # Entornos virtuales
 env/
@@ -19,10 +10,31 @@ venv/
 .venv/
 ENV/
 
+# Django runtime
+db.sqlite3
+/data/db.sqlite3
+/staticfiles/
+
+# ⚡ OJO: NO ignoramos /media/
+
+# Variables de entorno (secrets)
+.env
+.env.*         
+
+# Logs
+*.log          
+logs/         
+
+# Cachés de testing y cobertura
+.pytest_cache/  
+.coverage       
+htmlcov/        
+
 # Archivos de editores
 .vscode/
 .idea/
 *.swp
 
-# ⚡ OJO: NO ignoramos /media/
-# Porque necesitamos que las imágenes estén visibles en la demo local
+# MacOS basura
+.DS_Store
+__MACOSX/
