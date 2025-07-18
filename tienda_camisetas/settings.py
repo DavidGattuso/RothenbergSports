@@ -87,20 +87,32 @@ WSGI_APPLICATION = 'tienda_camisetas.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 
-# creacion base de datos ---> antes de iniciar el proyecto por primera ves crear en xamp la base de datos tienda_camisetas
-import pymysql
-pymysql.install_as_MySQLdb()
+# --- DETECCIÓN DE MOTOR DE BASE DE DATOS ---
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tienda_camisetas',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',  
-        'PORT': '3306',
+USE_SQLITE = os.environ.get('USE_SQLITE', 'False') == 'True'
+
+# BD usando Docker
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'data' / 'db.sqlite3',
+        }
     }
-}
+else:
+    # BD usando el VENV
+    import pymysql
+    pymysql.install_as_MySQLdb()
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'tienda_camisetas',
+            'USER': 'root',
+            'PASSWORD': '',
+            'HOST': 'localhost',
+            'PORT': '3306',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
