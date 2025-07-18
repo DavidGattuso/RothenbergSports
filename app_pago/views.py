@@ -33,22 +33,74 @@ def proceso_pago(request):
         if "terminos" not in request.POST:
             messages.error(request, "Debes aceptar los términos y condiciones.")
         elif form.is_valid():
-            # ... (creación de dirección, pedido, ítems, pago) ...
+            # 1) CREAR dirección de envío
+            dir_env = DireccionEnvio.objects.create(
+                usuario   = request.user,
+                direccion = form.cleaned_data["direccion"],
+                nombre    = form.cleaned_data["nombre"],
+                apellidos = form.cleaned_data["apellidos"],
+                telefono  = form.cleaned_data["telefono"],
+                rut       = form.cleaned_data["rut"],
+                email     = form.cleaned_data["email"],
+            )
 
-            # alta en micro-servicio (sin headers)
+            # 2) Calcula fecha de entrega (evita domingo)
+            fecha_entrega = date.today() + timedelta(days=3)
+            if fecha_entrega.weekday() == 6:  # domingo → lunes
+                fecha_entrega += timedelta(days=1)
+
+            # 3) CREAR pedido local
+            pedido = Pedido.objects.create(
+                usuario          = request.user,
+                direccion_envio  = dir_env,
+                opciones_entrega = f"Entrega el {fecha_entrega}",
+                monto_envio      = 3990,
+                total            = carrito.total + 3990,
+                estado           = EST_PREP,
+            )
+
+            # 4) CREAR ítems del carrito como PedidoItem
+            for it in carrito.carritoitem_set.all():
+                PedidoItem.objects.create(
+                    pedido              = pedido,
+                    producto_id_externo = it.producto_id_externo,
+                    nombre              = it.nombre,
+                    descripcion         = it.descripcion,
+                    imagen_url          = it.imagen_url,
+                    precio              = it.precio,
+                    cantidad            = it.cantidad,
+                    talla               = it.talla,
+                )
+
+            # 5) Vaciar carrito
+            carrito.carritoitem_set.all().delete()
+            carrito.total = 0
+            carrito.save()
+
+            # 6) Registrar Pago
+            Pago.objects.create(
+                usuario     = request.user,
+                pedido      = pedido,
+                metodo_pago = form.cleaned_data["metodo_pago"],
+                procesado   = True,
+            )
+
+            # 7) NOTIFICAR al microservicio de pedidos (sin headers)
             try:
-                requests.post(
-                    API_BASE,
+                resp = requests.post(
+                    API_BASE,   
                     json={
-                        "id"            : pedido.id,
-                        "estado"        : EST_PREP,
-                        "cliente_email" : dir_env.email,
+                        "id": pedido.id,
+                        "estado": EST_PREP,
+                        "cliente_email": dir_env.email,
                         "codigo_entrega": None,
                     },
-                    timeout=5   # ← headers eliminado
-                ).raise_for_status()
+                    timeout=5,
+                )
+                print("RESPUESTA API:", resp.status_code, resp.text)
+                resp.raise_for_status()
             except Exception as e:
-                print("API Pedidos:", e)
+                print("ERROR API Pedidos:", e)
                 messages.warning(
                     request,
                     "El pedido se creó localmente pero no se registró aún en el "
@@ -57,9 +109,9 @@ def proceso_pago(request):
 
             messages.success(request, "Pago realizado con éxito.")
             return redirect("perfil_usuario")
+
         else:
             messages.error(request, "Completa todos los campos correctamente.")
-
     else:
         form = ProcesoPagoForm()
 
@@ -82,7 +134,7 @@ def detalles_pedido(request, pedido_id):
 
     # refrescar estado desde la API
     try:
-        r = requests.get(f"{API_BASE}/{pedido.id}", timeout=5)  # ← headers eliminado
+        r = requests.get(f"{API_BASE}/{pedido.id}", timeout=5)  
         if r.status_code == 200:
             estado_api = r.json().get("estado")
             if estado_api and estado_api != pedido.estado:
