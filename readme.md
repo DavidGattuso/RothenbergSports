@@ -1,11 +1,22 @@
-# 🛍️ Rothenberg Sports
+# 👕👚 Rothenberg Sports
 
 **Tienda online de camisetas deportivas**
-*Django + MariaDB + API externa + Docker*
+*Django + MariaDB + Docker + SQLite + APIs externas*
 
 ---
 
-## 👕 ¿Qué hace este proyecto?
+##  ⚽️ Características principales
+
+* 🗂️ **Catálogo dinámico** (hombre, mujer, niños)
+* 🛒 **Carrito** con selección de tallas
+* 💳 **Checkout simulado** *(sin pagos reales)*
+* 📄 **Boletas en PDF** (Playwright + Chromium headless)
+* 👤 **Registro / Login** de usuarios
+* ⚙️ **Panel de administración**
+* 📡 **API REST** de productos
+* 🔌 **Totalmente desacoplado**: consume una API externa de camisetas
+
+---
 
 * **Catálogo dinámico** (hombre, mujer, niños)
 * **Carrito** con selección de tallas
@@ -65,7 +76,7 @@
    python -m playwright install
    ```
 
-5. Configura la base de datos MaríaDB (XAMPP):
+5. Configura la base de datos MariaDB (XAMPP):
 
    * Inicia MariaDB desde XAMPP.
    * En phpMyAdmin, crea la base `tienda_camisetas`.
@@ -90,8 +101,6 @@
 
 ## 📦 Uso con Docker
 
-Se incluye un **Dockerfile** y un volumen Docker para persistir datos en `./data/`.
-
 1. Construye la imagen Docker:
 
    ```bash
@@ -104,7 +113,7 @@ Se incluye un **Dockerfile** y un volumen Docker para persistir datos en `./data
    mkdir -p data
    ```
 
-3. Ejecuta el contenedor, montando `data/`:
+3. Ejecuta el contenedor con SQLite:
 
    ```bash
    docker run -d \
@@ -115,9 +124,7 @@ Se incluye un **Dockerfile** y un volumen Docker para persistir datos en `./data
      rothenberg-sports
    ```
 
-   > **Nota:** la variable de entorno `USE_SQLITE=True` fuerza el uso de SQLite en lugar de MariaDB.
-
-4. Dentro del contenedor, ejecuta migraciones (esto creará `db.sqlite3` en `data/`):
+4. Dentro del contenedor, ejecuta migraciones:
 
    ```bash
    docker exec rothenberg-sports python manage.py makemigrations
@@ -136,13 +143,75 @@ Se incluye un **Dockerfile** y un volumen Docker para persistir datos en `./data
    http://localhost:8000
    ```
 
-> **Nota:** El archivo `data/db.sqlite3` se generará en tu carpeta local `data/`.
+---
+
+## 📡 Consumo de la API de Camisetas
+
+Este proyecto obtiene las camisetas desde una API externa pública que solo permite **operaciones GET**. No es posible editar, actualizar ni borrar recursos.
+
+* **Endpoint base:** `https://api-camisetas-c3cq.onrender.com/camisetas`
+* **Operaciones disponibles:**
+
+  * `GET /camisetas/` → Lista todas las camisetas.
+  * `GET /camisetas/{id}/` → Obtiene el detalle de una camiseta por su ID.
+  * Filtros por query-string: `?genero=hombre`, `?genero=mujer`, `?genero=niños`, etc.
+
+### Configuración de IDs en `views.py`
+
+En `ecommerce_camisetas/views.py` se definen listas de IDs para categorizar las camisetas:
+
+```python
+# IDs para la pantalla principal (destacados)
+CAMISETAS_INDEX_IDS = [ /* Se recomienda destacar 1 de Hombre, Mujer y Niño */ ]
+# IDs de camisetas de hombre (primeras 300)
+CAMISETAS_HOMBRE_IDS = [ /* 1 - 300 IDs */ ]
+# IDs de camisetas de mujer (siguientes 30)
+CAMISETAS_MUJER_IDS = [ /* 301 - 330 IDs */ ]
+# IDs de camisetas de niños (últimas 20)
+CAMISETAS_NINOS_IDS = [ /* 331 - 350 IDs */ ]
+```
+
+Así, el buscador de la aplicación podrá mostrar todas las camisetas de equipos y países de todos los continentes usando estas listas.
+
+---
+
+## 🚚 Consumo de la API de Pedidos
+
+Se proporciona un **panel administrativo de logística** para cambiar el estado de los pedidos y simular el envío de correos y la validación de entregas.
+
+1. Accede al panel:
+   `https://api-camisetas-c3cq.onrender.com/static/pedidos_admin.html`
+2. Introduce el **token de seguridad**: `12345` y haz clic en **Cargar Pedidos**.
+3. Verás la lista de pedidos y sus estados actuales:
+
+   * Preparando Pedido
+   * Entregado a Transportista
+   * En Camino a tu Dirección
+   * Pedido Entregado
+4. Para simular el envío de un **código de entrega** al cliente (integración con Mailjet):
+
+   * Selecciona un pedido.
+   * Cambia su estado a **En Camino a tu Dirección**.
+   * Al guardar, el sistema generará un **código único** y enviará un correo al email que indiques mediante Mailjet (simulación).
+   * Copia el código recibido.
+5. Validación del código por el cliente:
+
+   * El cliente debe introducir el código en el mismo panel o en la interfaz correspondiente.
+   * Si el código coincide, el pedido cambiará a **Pedido Entregado**.
+   * Se mostrará en la página que el producto ya está entregado.
+
+---
+
+## ⚙️ Disponibilidad de las APIs
+
+Las **APIs de Camisetas** y de **Pedidos** están desplegadas en Render (plan gratuito). Render hiberna las aplicaciones tras periodos de inactividad, por lo que podría haber demoras iniciales al acceder:
+
+* Para mitigarlo, se configuró **Uptime Robot** para enviar un ping cada 5 minutos, manteniendo las APIs activas durante más tiempo.
+* Aun así, no hay garantía de disponibilidad continua; si la API está durmiendo, puede tardar hasta 2 minutos en responder.
 
 ---
 
 ## 🐬 Uso con Docker Compose
-
-También puedes usar **Docker Compose** para simplificar comandos:
 
 * Levanta servicios:
 
@@ -174,25 +243,12 @@ RothenbergSports/
 ├── docker-compose.yml       # Configuración Docker Compose
 ├── Dockerfile               # Imagen Docker
 ├── manage.py                # Script de gestión Django
-├── readme.md                # Documentación del proyecto
+├── README.md                # Documentación del proyecto
 └── requirements.txt         # Dependencias Python
 ```
 
 ---
 
-## ❓ Gitignore y base de datos
-
-Se recomienda ignorar el archivo SQLite para no subir datos de desarrollo:
-
-```gitignore
-# SQLite
-/data/db.sqlite3
-```
-
-La carpeta `data/` permanece, pero el `.sqlite3` dentro queda excluido.
-
----
-
 ## 🎉 ¡Listo para usar!
 
-Elige el método (manual o Docker) y ¡disfruta tu tienda de camisetas deportivas!
+Elige el método (manual o Docker) y ¡disfruta de las camisetas deportivas de Rothenberg Sports!
