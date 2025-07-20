@@ -154,7 +154,7 @@ Este proyecto obtiene las camisetas desde una API externa pública que solo perm
 
   * `GET /camisetas/` → Lista todas las camisetas.
   * `GET /camisetas/{id}/` → Obtiene el detalle de una camiseta por su ID.
-  * Filtros por query-string: `?genero=Masculino`, `?genero=Femenino`, `?genero=Niños`, etc.
+  * Filtros por query-string: `?genero=Masculino`, `?genero=Femenino`, `?genero=Niños`, `?nombre=Arsenal`,etc.
 
 ### Configuración de IDs en `views.py`
 
